@@ -1,0 +1,19 @@
+{
+    "entryFile": "src/app.ts",
+    "noImplicitAdditionalProperties": "throw-on-extras",
+    "controllerPathGlobs": ["src/routes/*controller.ts"],
+    "spec": {
+        "outputDirectory": "./build/",
+        "specVersion": 3,
+        "basePath": "/api/v1"
+    },
+    "routes": {
+        "routesDir": "./build/",
+        "basePath": "/api/v1"
+    },
+    "swagger":{
+        "outputDirectory": "./build/",
+        "entryFile": "./src/app.ts"
+    }
+
+}
