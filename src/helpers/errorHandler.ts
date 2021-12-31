@@ -1,6 +1,6 @@
-import { Express, Request, Response, NextFunction } from "express";
-import { ValidateError } from "tsoa";
-import { ApiError } from "./errors";
+import { Express, Request, Response, NextFunction } from 'express';
+import { ValidateError } from 'tsoa';
+import { ApiError } from './errors';
 
 export default (app: Express) => {
   app.use(
@@ -9,7 +9,7 @@ export default (app: Express) => {
         if (error.status === 401) {
           response.statusCode = 401;
           const msg = {
-            error: error.message || "Unauthorized",
+            error: error.message || 'Unauthorized',
           };
           msg.error = error.name
             ? `${error.name}: ${error.message}`
@@ -20,7 +20,7 @@ export default (app: Express) => {
         if (error.status === 404) {
           response.statusCode = 404;
           const msg = {
-            error: error.message || "Not Found",
+            error: error.message || 'Not Found',
           };
           msg.error = error.name
             ? `${error.name}: ${error.message}`
@@ -34,7 +34,7 @@ export default (app: Express) => {
             error.fields
           );
           return response.status(422).json({
-            message: "Validation Failed",
+            message: 'Validation Failed',
             details: error?.fields,
           });
         }
@@ -45,10 +45,10 @@ export default (app: Express) => {
           });
         }
 
-        if(error.status === 500) {
+        if (error.status === 500) {
           response.statusCode = 500;
           const msg = {
-            error: error.message || "Unknown Error",
+            error: error.message || 'Unknown Error',
           };
           msg.error = error.name
             ? `${error.name}: ${error.message}`

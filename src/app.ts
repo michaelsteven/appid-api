@@ -1,10 +1,10 @@
-import express, { Response as ExResponse, Request as ExRequest } from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import swaggerUi from "swagger-ui-express";
-import errorHandler from "./helpers/errorHandler";
-import { checkRequiredEnvironmentVariables, PORT } from "./helpers/env";
-import { RegisterRoutes } from "../build/routes";
+import express, { Response as ExResponse, Request as ExRequest } from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import errorHandler from './helpers/errorHandler';
+import { checkRequiredEnvironmentVariables, PORT } from './helpers/env';
+import { RegisterRoutes } from '../build/routes';
 checkRequiredEnvironmentVariables();
 
 const app = express();
@@ -13,17 +13,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 /* liveness and health */
-app.get("/health", (req, res) => {
-  res.status(200).send({ status: "UP" });
+app.get('/health', (req, res) => {
+  res.status(200).send({ status: 'UP' });
 });
-app.get("/liveness", (req, res) => {
-  res.status(200).send({ status: "UP" });
+app.get('/liveness', (req, res) => {
+  res.status(200).send({ status: 'UP' });
 });
 
-//Swagger UI implementation
-app.use("/docs", swaggerUi.serve, async (_req: ExRequest, res: ExResponse) => {
+// Swagger UI implementation
+app.use('/docs', swaggerUi.serve, async (_req: ExRequest, res: ExResponse) => {
   return res.send(
-    swaggerUi.generateHTML(await import("../build/swagger.json"))
+    swaggerUi.generateHTML(await import('../build/swagger.json'))
   );
 });
 

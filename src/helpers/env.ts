@@ -1,5 +1,5 @@
-import colors from "colors";
-import dotenv from "dotenv";
+import colors from 'colors';
+import dotenv from 'dotenv';
 dotenv.config();
 
 export const PORT = process.env.PORT || 8080;
@@ -8,10 +8,10 @@ export const APPID_SERVICE_ENDPOINT = process.env.APPID_SERVICE_ENDPOINT;
 export const APPID_API_TENANT_ID = process.env.APPID_API_TENANT_ID;
 
 export const checkRequiredEnvironmentVariables = () => {
-  let requiredEnvironmentVars = [
-    "IBMCLOUD_API_KEY",
-    "APPID_SERVICE_ENDPOINT",
-    "APPID_API_TENANT_ID",
+  const requiredEnvironmentVars = [
+    'IBMCLOUD_API_KEY',
+    'APPID_SERVICE_ENDPOINT',
+    'APPID_API_TENANT_ID',
   ];
   let missingCount = 0;
   requiredEnvironmentVars.forEach((envVar) => {
@@ -25,6 +25,6 @@ export const checkRequiredEnvironmentVariables = () => {
     }
   });
   if (missingCount > 0) {
-    throw new Error("Missing required environment variable(s)");
+    throw new Error('Missing required environment variable(s)');
   }
 };
