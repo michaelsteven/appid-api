@@ -9,20 +9,21 @@ import {
 
 export const cloudDirectorySignUp = async (user: User) => {
   const bearerToken = await setBearerToken();
+  console.log(JSON.stringify(user));
   const url = APPID_SERVICE_ENDPOINT;
   const path = `/management/v4/${APPID_API_TENANT_ID}/cloud_directory/sign_up`;
   const query = '?shouldCreateProfile=true&language=en';
 
-  const response = await fetch(`${url}${path}${query}`, {
+  const options = {
     method: 'POST',
+    body: JSON.stringify({ ...user, }),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${bearerToken}`,
     },
-    body: JSON.stringify({
-      ...user,
-    }),
-  })
+  };
+
+  const response = await fetch(`${url}${path}${query}`, options)
     .then((result) => result)
     .catch((error) => {
       const failed = new ApiError(500, 'Error:'.concat(JSON.stringify(error)));

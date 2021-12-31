@@ -1,27 +1,29 @@
 import fetch from 'cross-fetch';
 import { ApiError } from '../helpers/errors';
 import { isJSON } from '../helpers/utilities';
-import {
-  IBMCLOUD_API_KEY,
-} from '../helpers/env';
+import { IBMCLOUD_API_KEY } from '../helpers/env';
 
 export const setBearerToken = async () => {
-  const result = await fetch('https://iam.cloud.ibm.com/identity/token', {
+  const options = {
     method: 'POST',
+    body: `grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey=${IBMCLOUD_API_KEY}`,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
+      Accept: 'application/json'
     },
-    body: `grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey=${IBMCLOUD_API_KEY}`,
-  })
+  };
+
+  const result = await fetch('https://iam.cloud.ibm.com/identity/token', options)
     .then((result) => result)
     .catch((error) => {
       throw error;
     });
 
   if (result.status === 200) {
-    const accessToken = await result.json();
-    return accessToken;
+    // eslint-disable-next-line camelcase
+    const { access_token } = await result.json();
+    // eslint-disable-next-line camelcase
+    return access_token;
   }
 
   if (result.status === 400 || result.status === 500) {
