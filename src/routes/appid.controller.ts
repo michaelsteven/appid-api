@@ -3,7 +3,7 @@ import { ApiError } from '../helpers/errors';
 import {
   cloudDirectorySignUp,
   cloudDirectoryProfileRemove,
-} from '../apis/appId';
+} from '../apis';
 import colors from 'colors';
 import _ from 'lodash';
 
