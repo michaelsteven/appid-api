@@ -3,12 +3,13 @@ import { ApiError } from '../helpers/errors';
 import {
   cloudDirectorySignUp,
   cloudDirectoryProfileRemove,
+  login,
 } from '../apis';
 import colors from 'colors';
 import _ from 'lodash';
 
 @Route('appid')
-export class appIdController extends Controller {
+export class appIdUserController extends Controller {
   /**
    * Posts new user.
    */
@@ -74,6 +75,38 @@ export class appIdController extends Controller {
           console.log('\n');
         }
       }
+      throw error;
+    }
+  }
+
+  /**
+   * Login with Username and Password
+   */
+  @Response<ApiError>(500, 'Failed to login')
+  @SuccessResponse(200, 'Successful Login')
+  @Post('/login')
+  public async loginWithUsernamePassword (
+    @Body() body: {
+      username: string;
+      password: string;
+      redirectUri: string;
+    }
+  ): Promise<string> {
+    const { username, password, redirectUri } = body;
+    try {
+      const responsePayload = await login(username, password, redirectUri);
+      if (responsePayload) {
+        this.setStatus(200);
+        return Promise.resolve(JSON.stringify(responsePayload));
+      } else {
+        throw new ApiError(500, 'Failed to log into App ID account.');
+      }
+    } catch (error) {
+      console.log('\n');
+      console.log(colors.bold('----- rollback app_id user -----'));
+      console.log(colors.red('Failed to rollback app_id.'));
+      console.log(colors.red(JSON.stringify(error)));
+      console.log('\n');
       throw error;
     }
   }
