@@ -98,7 +98,7 @@ export class appIdUserController extends Controller {
       const responsePayload = await login(username, password);
       if (responsePayload) {
         const authToken = JSON.stringify(responsePayload);
-        const cookieOptions = 'HttpOnly; SameSite=Strict;';
+        const cookieOptions = 'path=/; SameSite=Strict;'; // not setting HttpOnly because client will read cookie with javascript
         this.setHeader('Set-Cookie', `authToken=${authToken}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
         this.setStatus(200);
         return 'success';
