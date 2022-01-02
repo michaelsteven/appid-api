@@ -7,7 +7,7 @@ import {
   APPID_SECRET
 } from '../helpers/env';
 
-export const login = async (username: string, password: string, redirectUri: string) => {
+export const login = async (username: string, password: string) => {
   const url = APPID_SERVICE_ENDPOINT;
   const path = `/oauth/v4/${APPID_API_TENANT_ID}/token`;
   const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
@@ -39,7 +39,7 @@ export const login = async (username: string, password: string, redirectUri: str
   }
 
   if (response.status === 400) {
-    throw new ApiError(400, 'Invalid access to app ID.');
+    throw new ApiError(400, 'Login Failed');
   } else if (response.status === 401) {
     throw new ApiError(401, 'The user is unauthorized.');
   }

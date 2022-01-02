@@ -1,4 +1,5 @@
-import { Body, Controller, Post, Response, Route, SuccessResponse } from 'tsoa';
+import { Body, Controller, Post, Request, Response, Route, SuccessResponse } from 'tsoa';
+import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import {
   cloudDirectorySignUp,
@@ -45,7 +46,7 @@ export class appIdUserController extends Controller {
     let profileId;
     let cloudDirectoyID;
     try {
-      const appIdUser = await cloudDirectorySignUp(user);
+      const appIdUser = cloudDirectorySignUp(user);
       profileId = _.get(appIdUser, ['profileId']);
       cloudDirectoyID = _.get(appIdUser, ['id']);
 
@@ -86,25 +87,27 @@ export class appIdUserController extends Controller {
   @SuccessResponse(200, 'Successful Login')
   @Post('/login')
   public async loginWithUsernamePassword (
+    @Request() exRequest: ExRequest,
     @Body() body: {
       username: string;
       password: string;
-      redirectUri: string;
     }
   ): Promise<string> {
-    const { username, password, redirectUri } = body;
+    const { username, password } = body;
     try {
-      const responsePayload = await login(username, password, redirectUri);
+      const responsePayload = await login(username, password);
       if (responsePayload) {
+        const authToken = JSON.stringify(responsePayload);
+        const cookieOptions = 'HttpOnly; SameSite=Strict;';
+        this.setHeader('Set-Cookie', `authToken=${authToken}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
         this.setStatus(200);
-        return Promise.resolve(JSON.stringify(responsePayload));
+        return 'success';
       } else {
+        console.log('An error occurred');
         throw new ApiError(500, 'Failed to log into App ID account.');
       }
     } catch (error) {
       console.log('\n');
-      console.log(colors.bold('----- rollback app_id user -----'));
-      console.log(colors.red('Failed to rollback app_id.'));
       console.log(colors.red(JSON.stringify(error)));
       console.log('\n');
       throw error;

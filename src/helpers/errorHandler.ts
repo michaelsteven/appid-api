@@ -1,10 +1,10 @@
-import { Express, Request, Response, NextFunction } from 'express';
+import { Express, Request as ExRequest, Response as ExResponse, NextFunction } from 'express';
 import { ValidateError } from 'tsoa';
 import { ApiError } from './errors';
 
 export default (app: Express) => {
   app.use(
-    (error: any, _request: Request, response: Response, next: NextFunction) => {
+    (error: any, _request: ExRequest, response: ExResponse, next: NextFunction) => {
       if (error) {
         if (error.status === 401) {
           response.statusCode = 401;
@@ -40,6 +40,8 @@ export default (app: Express) => {
         }
 
         if (error instanceof ApiError) {
+          console.log(error.message);
+          console.log(error.statusCode);
           return response.status(error.statusCode).json({
             message: error.message,
           });
