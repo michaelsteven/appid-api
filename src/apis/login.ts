@@ -1,11 +1,21 @@
 import fetch from 'cross-fetch';
+import passport from 'passport';
 import { ApiError } from '../helpers/errors';
 import {
   APPID_SERVICE_ENDPOINT,
   APPID_API_TENANT_ID,
   APPID_CLIENT_ID,
-  APPID_SECRET
+  APPID_SECRET,
 } from '../helpers/env';
+const WebAppStrategy = require('ibmcloud-appid').WebAppStrategy;
+
+export const login2 = (username: string, password: string) => {
+  passport.authenticate(WebAppStrategy.STRATEGY_NAME, {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true // allow flash messages
+  });
+};
 
 export const login = async (username: string, password: string) => {
   const url = APPID_SERVICE_ENDPOINT;

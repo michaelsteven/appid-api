@@ -57,6 +57,18 @@ export default (app: Express) => {
             : error.message;
           response.end(JSON.stringify(msg));
         }
+
+        // catch all
+        if (typeof error.statusCode === 'undefined') {
+          console.log(error);
+          return response.status(500).json({
+            message: 'an unknown error occurred'
+          });
+        } else {
+          return response.status(error.statusCode).json({
+            message: error.message,
+          });
+        }
       }
       next();
     }

@@ -1,5 +1,6 @@
 import express, { Response as ExResponse, Request as ExRequest } from 'express';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import errorHandler from './helpers/errorHandler';
@@ -11,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 /* liveness and health */
 app.get('/health', (req, res) => {

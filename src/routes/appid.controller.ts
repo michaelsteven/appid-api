@@ -1,13 +1,11 @@
-import { Body, Controller, Post, Request, Response, Route, SuccessResponse } from 'tsoa';
+import { Body, Controller, Get, Post, Request, Response, Route, SuccessResponse } from 'tsoa';
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
-import {
-  cloudDirectorySignUp,
-  cloudDirectoryProfileRemove,
-  login,
-} from '../apis';
+import { getLocale } from '../helpers/locale';
+import { loginWithCredentials } from '../services/userLoginService';
+import { signup } from '../services/userSignupService';
+import { getUserProfile } from '../services/userProfileService';
 import colors from 'colors';
-import _ from 'lodash';
 
 @Route('appid')
 export class appIdUserController extends Controller {
@@ -18,6 +16,7 @@ export class appIdUserController extends Controller {
   @SuccessResponse(201, 'Successfully created new user with id')
   @Post('/signup')
   public async createUser (
+    @Request() exRequest: ExRequest,
     @Body()
       body: {
       firstName: string;
@@ -27,57 +26,9 @@ export class appIdUserController extends Controller {
     }
   ): Promise<void> {
     const { firstName, lastName, email, password } = body;
-    const user = {
-      active: true,
-      emails: [
-        {
-          value: email,
-          primary: true,
-        },
-      ],
-      userName: email,
-      password: password,
-      name: {
-        familyName: lastName,
-        givenName: firstName,
-      },
-    };
-
-    let profileId;
-    let cloudDirectoyID;
-    try {
-      const appIdUser = cloudDirectorySignUp(user);
-      profileId = _.get(appIdUser, ['profileId']);
-      cloudDirectoyID = _.get(appIdUser, ['id']);
-
-      if (profileId) {
-        // TODO save id to database
-
-        this.setStatus(200);
-        return;
-      } else {
-        throw new ApiError(500, 'Failed to generate App ID account.');
-      }
-    } catch (error) {
-      if (cloudDirectoyID) {
-        try {
-          const rollbackProfile = await cloudDirectoryProfileRemove(
-            cloudDirectoyID
-          );
-          console.log('\n');
-          console.log(colors.bold('----- rollback app_id user -----'));
-          console.log(rollbackProfile ? colors.red(rollbackProfile) : '');
-          console.log('\n');
-        } catch (error) {
-          console.log('\n');
-          console.log(colors.bold('----- rollback app_id user -----'));
-          console.log(colors.red('Failed to rollback app_id.'));
-          console.log(colors.red(JSON.stringify(error)));
-          console.log('\n');
-        }
-      }
-      throw error;
-    }
+    const locale = getLocale(exRequest);
+    await signup(firstName, lastName, email, password, locale);
+    this.setStatus(201);
   }
 
   /**
@@ -95,11 +46,9 @@ export class appIdUserController extends Controller {
   ): Promise<string> {
     const { username, password } = body;
     try {
-      const responsePayload = await login(username, password);
-      if (responsePayload) {
-        const authToken = JSON.stringify(responsePayload);
-        const cookieOptions = 'path=/; SameSite=Strict;'; // not setting HttpOnly because client will read cookie with javascript
-        this.setHeader('Set-Cookie', `authToken=${authToken}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
+      const cookieArray = await loginWithCredentials(username, password, exRequest);
+      if (cookieArray.length > 0) {
+        this.setHeader('Set-Cookie', cookieArray);
         this.setStatus(200);
         return 'success';
       } else {
@@ -112,5 +61,17 @@ export class appIdUserController extends Controller {
       console.log('\n');
       throw error;
     }
+  }
+
+  /**
+   * Get Profile
+   */
+   @SuccessResponse(200, 'Gets Profile')
+   @Get('/profile')
+  public async getProfile (
+    @Request() exRequest: ExRequest
+  ) {
+    const { access_token: accessToken, id_token: idToken } = exRequest.cookies;
+    return await getUserProfile(accessToken, idToken);
   }
 }
