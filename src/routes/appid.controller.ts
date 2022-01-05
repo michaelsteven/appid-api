@@ -45,11 +45,9 @@ export class appIdUserController extends Controller {
   ): Promise<string> {
     const { username, password } = body;
     try {
-      const cookieArray = await loginWithCredentials(username, password, exRequest);
-      if (cookieArray.length > 0) {
-        this.setHeader('Set-Cookie', cookieArray);
-        this.setStatus(200);
-        return 'success';
+      const response = await loginWithCredentials(username, password, exRequest);
+      if (response) {
+        return response;
       } else {
         console.log('An error occurred');
         throw new ApiError(500, 'Failed to log into App ID account.');
