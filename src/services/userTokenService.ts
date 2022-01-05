@@ -15,13 +15,10 @@ export const getAppIdentityToken = () => {
     secret: APPID_SECRET,
     oauthServerUrl: `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}`,
   };
-
   const TokenManager = require('ibmcloud-appid').TokenManager;
   const tokenManager = new TokenManager(config);
   try {
-    const tokenResponse = tokenManager.getApplicationIdentityToken();
-    // console.log('Token response : ' + JSON.stringify(tokenResponse));
-    return tokenResponse;
+    return tokenManager.getApplicationIdentityToken();
   } catch (err) {
     console.log('err obtained : ' + err);
   }

@@ -20,10 +20,8 @@ export const setBearerToken = async () => {
     });
 
   if (result.status === 200) {
-    // eslint-disable-next-line camelcase
-    const { access_token } = await result.json();
-    // eslint-disable-next-line camelcase
-    return access_token;
+    const { access_token: accessToken } = await result.json();
+    return accessToken;
   }
 
   if (result.status === 400 || result.status === 500) {
@@ -31,7 +29,6 @@ export const setBearerToken = async () => {
       const failed = await result.json();
       throw failed;
     } else {
-      console.log(result);
       throw new ApiError(500, 'Service Unavailable');
     }
   }

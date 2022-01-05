@@ -1,8 +1,11 @@
 import { Request as ExRequest, } from 'express';
 import {
   login,
+  cloudDirectoryForgotPassword,
 } from '../apis';
 import { USE_REFRESH_TOKEN, REFRESH_TOKEN_DAYS } from '../helpers/env';
+import { getLocale } from '../helpers/locale';
+import { ForgotPasswordUser } from '../models/ForgotPasswordUser';
 
 /**
  * Login with Credentials
@@ -12,12 +15,22 @@ import { USE_REFRESH_TOKEN, REFRESH_TOKEN_DAYS } from '../helpers/env';
  * @returns []
  */
 export async function loginWithCredentials (username: string, password: string, exRequest: ExRequest) {
-  const responsePayload = await login(username, password);
+  const locale = getLocale(exRequest);
+  const responsePayload = await login(username, password, locale);
   if (responsePayload) {
-    console.log(JSON.stringify(JSON.stringify(responsePayload)));
     return buildCookieArray(responsePayload, exRequest);
   }
   return [];
+}
+
+/**
+ * Forgot Password
+ * @param username username
+ * @param locale locale
+ * @returns ForgotPasswordUser
+ */
+export async function forgotPassword (username: string, locale: string) : Promise<ForgotPasswordUser> {
+  return await cloudDirectoryForgotPassword(username, locale) || Promise.reject(new Error('invalid response'));
 }
 
 /**

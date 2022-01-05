@@ -22,8 +22,7 @@ export const userProfile = async (profileId: number) => {
     });
 
   if (response.status === 200 || response.status === 201) {
-    const user = await response.json();
-    return user;
+    return await response.json();
   }
 
   if (response.status === 400) {

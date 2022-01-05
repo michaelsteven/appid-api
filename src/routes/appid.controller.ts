@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request, Response, Route, SuccessResponse 
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { loginWithCredentials } from '../services/userLoginService';
+import { forgotPassword, loginWithCredentials } from '../services/userLoginService';
 import { signup } from '../services/userSignupService';
 import { getUserProfile } from '../services/userProfileService';
 import colors from 'colors';
@@ -63,15 +63,34 @@ export class appIdUserController extends Controller {
     }
   }
 
+  @Response(400, 'The request body is missing or invalid')
+  @Response(401, 'The user is unauthorized.')
+  @Response(403, 'Insufficient permissions.')
+  @Response(409, 'User account not verified.')
+  @SuccessResponse(200, 'Successful Login')
+  @Post('/forgotpwd')
+  public async forgotPassword (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      username: string;
+    }
+  ) : Promise<string> {
+    const { username } = body;
+    const locale = getLocale(exRequest);
+    const jsonResponse = await forgotPassword(username, locale);
+    this.setStatus(201);
+    return JSON.stringify(jsonResponse);
+  }
+
   /**
    * Get Profile
    */
    @SuccessResponse(200, 'Gets Profile')
    @Get('/profile')
-  public async getProfile (
+  public getProfile (
     @Request() exRequest: ExRequest
   ) {
     const { access_token: accessToken, id_token: idToken } = exRequest.cookies;
-    return await getUserProfile(accessToken, idToken);
+    return getUserProfile(accessToken, idToken);
   }
 }

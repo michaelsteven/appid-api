@@ -1,5 +1,4 @@
 import fetch from 'cross-fetch';
-import passport from 'passport';
 import { ApiError } from '../helpers/errors';
 import {
   APPID_SERVICE_ENDPOINT,
@@ -7,17 +6,8 @@ import {
   APPID_CLIENT_ID,
   APPID_SECRET,
 } from '../helpers/env';
-const WebAppStrategy = require('ibmcloud-appid').WebAppStrategy;
 
-export const login2 = (username: string, password: string) => {
-  passport.authenticate(WebAppStrategy.STRATEGY_NAME, {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true // allow flash messages
-  });
-};
-
-export const login = async (username: string, password: string) => {
+export const login = async (username: string, password: string, locale: string) => {
   const url = APPID_SERVICE_ENDPOINT;
   const path = `/oauth/v4/${APPID_API_TENANT_ID}/token`;
   const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
@@ -33,6 +23,7 @@ export const login = async (username: string, password: string) => {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       Authorization: `Basic ${base64Creds}`,
+      'Accept-Language': locale,
     },
   };
 
@@ -44,8 +35,7 @@ export const login = async (username: string, password: string) => {
     });
 
   if (response.status === 200) {
-    const json = await response.json();
-    return json;
+    return await response.json();
   }
 
   if (response.status === 400) {

@@ -15,7 +15,6 @@ userProfileManager.init({
  */
 export const getUserProfile = (accessToken: string, identityToken: string) => {
   userProfileManager.getUserInfo(accessToken, identityToken).then(function (userInfo : any) {
-    console.log(userInfo);
     return userInfo;
   });
 };

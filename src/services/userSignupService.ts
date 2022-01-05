@@ -29,22 +29,21 @@ export async function signup (firstName : string, lastName : string, email: stri
   const user = buildSignupUser(firstName, lastName, email, password);
 
   const appIdUser = await selfServiceSignup(user, locale);
-  let cloudDirectoyID;
+  let cloudDirectoyId;
   try {
-    cloudDirectoyID = _.get(appIdUser, ['id']);
+    cloudDirectoyId = _.get(appIdUser, ['id']);
     const profileId = _.get(appIdUser, ['profileId']);
     if (profileId) {
       // TODO save id to database
       return user;
     } else {
-      console.log('throwing 500');
       throw new ApiError(500, 'Failed to generate App ID account.');
     }
   } catch (error) {
-    if (cloudDirectoyID) {
+    if (cloudDirectoyId) {
       try {
         const rollbackProfile = await cloudDirectoryProfileRemove(
-          cloudDirectoyID
+          cloudDirectoyId
         );
         console.log('\n');
         console.log(colors.bold('----- rollback app_id user -----'));
