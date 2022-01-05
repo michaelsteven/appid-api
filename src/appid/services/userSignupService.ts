@@ -1,14 +1,14 @@
-import { ApiError } from '../helpers/errors';
+import { ApiError } from '../../helpers/errors';
 import _ from 'lodash';
 import colors from 'colors';
 import { User } from '../models/user';
 import { cloudDirectoryProfileRemove } from '../apis';
-import { getAppIdentityToken } from './userTokenService';
+import { getAppIdentityToken } from './tokenService';
 import {
   IBMCLOUD_API_KEY,
   APPID_SERVICE_ENDPOINT,
   APPID_API_TENANT_ID,
-} from '../helpers/env';
+} from '../../helpers/env';
 
 const SelfServiceManager = require('ibmcloud-appid').SelfServiceManager;
 const selfServiceManager = new SelfServiceManager({
@@ -29,13 +29,11 @@ export async function signup (firstName : string, lastName : string, email: stri
   const user = buildSignupUser(firstName, lastName, email, password);
 
   const appIdUser = await selfServiceSignup(user, locale);
-  let cloudDirectoyId;
+  const { id: cloudDirectoyId } = appIdUser;
   try {
-    cloudDirectoyId = _.get(appIdUser, ['id']);
-    const profileId = _.get(appIdUser, ['profileId']);
-    if (profileId) {
+    if (appIdUser) {
       // TODO save id to database
-      return user;
+      return appIdUser;
     } else {
       throw new ApiError(500, 'Failed to generate App ID account.');
     }
@@ -67,11 +65,7 @@ export async function signup (firstName : string, lastName : string, email: stri
  */
 export async function selfServiceSignup (user: User, locale: string) {
   const iamToken = getAppIdentityToken();
-  await selfServiceManager.signUp(user, locale, iamToken).then(function (token: any) {
-    return token;
-  }).catch(function (err: any) {
-    throw err;
-  });
+  return await selfServiceManager.signUp(user, locale, iamToken).then((result:any) => result);
 };
 
 /**

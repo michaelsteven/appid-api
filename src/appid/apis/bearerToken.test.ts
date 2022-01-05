@@ -1,6 +1,5 @@
 import { setBearerToken } from './bearerToken';
 import fetch from 'cross-fetch';
-
 jest.mock('cross-fetch');
 
 beforeEach(() => {

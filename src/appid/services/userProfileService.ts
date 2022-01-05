@@ -1,7 +1,7 @@
 import {
   APPID_SERVICE_ENDPOINT,
   APPID_API_TENANT_ID,
-} from '../helpers/env';
+} from '../../helpers/env';
 const userProfileManager = require('ibmcloud-appid').UserProfileManager;
 
 userProfileManager.init({

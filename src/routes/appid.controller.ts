@@ -2,10 +2,7 @@ import { Body, Controller, Get, Post, Put, Request, Response, Route, SuccessResp
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { forgotPassword, loginWithCredentials } from '../services/userLoginService';
-import { signup } from '../services/userSignupService';
-import { getUserProfile } from '../services/userProfileService';
-import { getSupportedLanguages, putSupportedLanguages } from '../services/appIdLanguageService';
+import { signup, loginWithCredentials, forgotPassword, getSupportedLanguages, setSupportedLanguages, getUserProfile } from '../appid/services';
 import colors from 'colors';
 
 @Route('appid')
@@ -25,11 +22,12 @@ export class appIdUserController extends Controller {
       email: string;
       password: string;
     }
-  ): Promise<void> {
+  ): Promise<any> {
     const { firstName, lastName, email, password } = body;
     const locale = getLocale(exRequest);
-    await signup(firstName, lastName, email, password, locale);
+    const response = await signup(firstName, lastName, email, password, locale);
     this.setStatus(201);
+    return response;
   }
 
   /**
@@ -119,7 +117,7 @@ export class appIdUserController extends Controller {
     }
   ) {
     const locale = getLocale(exRequest);
-    const jsonResponse = await putSupportedLanguages(body, locale);
+    const jsonResponse = await setSupportedLanguages(body, locale);
     this.setStatus(200);
     return jsonResponse;
   }

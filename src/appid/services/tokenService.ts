@@ -3,7 +3,7 @@ import {
   APPID_API_TENANT_ID,
   APPID_CLIENT_ID,
   APPID_SECRET
-} from '../helpers/env';
+} from '../../helpers/env';
 
 /**
  * Gets the app identy token

@@ -1,6 +1,6 @@
 import fetch from 'cross-fetch';
-import { ApiError } from '../helpers/errors';
-import { IBMCLOUD_API_KEY } from '../helpers/env';
+import { ApiError } from '../../helpers/errors';
+import { IBMCLOUD_API_KEY } from '../../helpers/env';
 
 export const setBearerToken = async () => {
   const options = {

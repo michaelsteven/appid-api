@@ -1,10 +1,10 @@
 import { Request as ExRequest, } from 'express';
 import {
-  login,
-  cloudDirectoryForgotPassword,
+  loginWithCredentials as apiLoginWithCredentials,
+  forgotPassword as apiForgotPassword,
 } from '../apis';
-import { USE_REFRESH_TOKEN, REFRESH_TOKEN_DAYS } from '../helpers/env';
-import { getLocale } from '../helpers/locale';
+import { USE_REFRESH_TOKEN, REFRESH_TOKEN_DAYS } from '../../helpers/env';
+import { getLocale } from '../../helpers/locale';
 import { ForgotPasswordUser } from '../models/ForgotPasswordUser';
 
 /**
@@ -16,7 +16,7 @@ import { ForgotPasswordUser } from '../models/ForgotPasswordUser';
  */
 export async function loginWithCredentials (username: string, password: string, exRequest: ExRequest) {
   const locale = getLocale(exRequest);
-  const responsePayload = await login(username, password, locale);
+  const responsePayload = await apiLoginWithCredentials(username, password, locale);
   if (responsePayload) {
     return buildCookieArray(responsePayload, exRequest);
   }
@@ -30,7 +30,7 @@ export async function loginWithCredentials (username: string, password: string, 
  * @returns ForgotPasswordUser
  */
 export async function forgotPassword (username: string, locale: string) : Promise<ForgotPasswordUser> {
-  return await cloudDirectoryForgotPassword(username, locale);
+  return await apiForgotPassword(username, locale);
 }
 
 /**

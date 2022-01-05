@@ -1,3 +1,4 @@
+import fetch from 'cross-fetch';
 import { ApiError } from './errors';
 
 export const isJSON = (str: any) => {
@@ -7,6 +8,11 @@ export const isJSON = (str: any) => {
     return false;
   }
   return true;
+};
+
+export const awaitFetch = async (url: string, options: any) => {
+  const response = await fetch(url, options).then((result) => result);
+  return handleResponse(response);
 };
 
 export const handleResponse = async (response: Response) => {
