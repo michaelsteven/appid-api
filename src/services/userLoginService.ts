@@ -30,7 +30,7 @@ export async function loginWithCredentials (username: string, password: string, 
  * @returns ForgotPasswordUser
  */
 export async function forgotPassword (username: string, locale: string) : Promise<ForgotPasswordUser> {
-  return await cloudDirectoryForgotPassword(username, locale) || Promise.reject(new Error('invalid response'));
+  return await cloudDirectoryForgotPassword(username, locale);
 }
 
 /**

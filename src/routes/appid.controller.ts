@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Request, Response, Route, SuccessResponse } from 'tsoa';
+import { Body, Controller, Get, Post, Put, Request, Response, Route, SuccessResponse } from 'tsoa';
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
 import { forgotPassword, loginWithCredentials } from '../services/userLoginService';
 import { signup } from '../services/userSignupService';
 import { getUserProfile } from '../services/userProfileService';
+import { getSupportedLanguages, putSupportedLanguages } from '../services/appIdLanguageService';
 import colors from 'colors';
 
 @Route('appid')
@@ -85,12 +86,41 @@ export class appIdUserController extends Controller {
   /**
    * Get Profile
    */
-   @SuccessResponse(200, 'Gets Profile')
-   @Get('/profile')
+  @SuccessResponse(200, 'Gets Profile')
+  @Get('/profile')
   public getProfile (
     @Request() exRequest: ExRequest
   ) {
     const { access_token: accessToken, id_token: idToken } = exRequest.cookies;
     return getUserProfile(accessToken, idToken);
+  }
+
+  /**
+   * Get Supported Languages
+   */
+  @SuccessResponse(200, 'Gets Supported Languages')
+  @Get('/languages')
+  public supportedLanguagesGet (
+    @Request() exRequest: ExRequest
+  ) {
+    const locale = getLocale(exRequest);
+    return getSupportedLanguages(locale);
+  }
+
+  /**
+   * Put Supported Languages
+   */
+  @SuccessResponse(200, 'Puts Supported Languages')
+  @Put('/languages')
+  public async supporteedLanguagesPut (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      languages: Array<string>;
+    }
+  ) {
+    const locale = getLocale(exRequest);
+    const jsonResponse = await putSupportedLanguages(body, locale);
+    this.setStatus(200);
+    return jsonResponse;
   }
 }

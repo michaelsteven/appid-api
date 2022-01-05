@@ -1,3 +1,5 @@
+import { ApiError } from './errors';
+
 export const isJSON = (str: any) => {
   try {
     JSON.parse(str);
@@ -5,4 +7,12 @@ export const isJSON = (str: any) => {
     return false;
   }
   return true;
+};
+
+export const handleResponse = async (response: Response) => {
+  if (response.ok) {
+    const json = await response.json();
+    return json;
+  }
+  throw new ApiError(response.status, response.statusText);
 };

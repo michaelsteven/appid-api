@@ -1,6 +1,5 @@
 import fetch from 'cross-fetch';
 import { ApiError } from '../helpers/errors';
-import { isJSON } from '../helpers/utilities';
 import { IBMCLOUD_API_KEY } from '../helpers/env';
 
 export const setBearerToken = async () => {
@@ -12,24 +11,10 @@ export const setBearerToken = async () => {
       Accept: 'application/json'
     },
   };
-
-  const result = await fetch('https://iam.cloud.ibm.com/identity/token', options)
-    .then((result) => result)
-    .catch((error) => {
-      throw error;
-    });
-
-  if (result.status === 200) {
+  const result = await fetch('https://iam.cloud.ibm.com/identity/token', options).then((result) => result);
+  if (result.ok) {
     const { access_token: accessToken } = await result.json();
     return accessToken;
   }
-
-  if (result.status === 400 || result.status === 500) {
-    if (isJSON(result)) {
-      const failed = await result.json();
-      throw failed;
-    } else {
-      throw new ApiError(500, 'Service Unavailable');
-    }
-  }
+  throw new ApiError(result.status, result.statusText);
 };
