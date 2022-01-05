@@ -1,12 +1,7 @@
-import {
-  APPID_SERVICE_ENDPOINT,
-  APPID_API_TENANT_ID,
-  APPID_CLIENT_ID,
-  APPID_SECRET
-} from '../../helpers/env';
+import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID, APPID_CLIENT_ID, APPID_SECRET } from '../../helpers/env';
 
 /**
- * Gets the app identy token
+ * Gets the app identity token
  */
 export const getAppIdentityToken = () => {
   const config = {

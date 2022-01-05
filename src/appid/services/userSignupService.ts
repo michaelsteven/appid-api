@@ -1,14 +1,9 @@
 import { ApiError } from '../../helpers/errors';
-import _ from 'lodash';
 import colors from 'colors';
 import { User } from '../models/user';
 import { cloudDirectoryProfileRemove } from '../apis';
 import { getAppIdentityToken } from './tokenService';
-import {
-  IBMCLOUD_API_KEY,
-  APPID_SERVICE_ENDPOINT,
-  APPID_API_TENANT_ID,
-} from '../../helpers/env';
+import { IBMCLOUD_API_KEY, APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
 
 const SelfServiceManager = require('ibmcloud-appid').SelfServiceManager;
 const selfServiceManager = new SelfServiceManager({

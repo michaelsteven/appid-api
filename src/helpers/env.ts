@@ -10,8 +10,6 @@ export const APPID_CLIENT_ID = process.env.APPID_CLIENT_ID;
 export const APPID_SECRET = process.env.APPID_SECRET;
 export const FALLBACK_LANGUAGE = process.env.FALLBACK_LANGUAGE;
 export const SUPPORTED_LANGUAGES = process.env.SUPPORTED_LANGUAGES;
-export const USE_REFRESH_TOKEN = process.env.USE_REFRESH_TOKEN;
-export const REFRESH_TOKEN_DAYS = process.env.REFRESH_TOKEN_DAYS;
 
 export const checkRequiredEnvironmentVariables = () => {
   const requiredEnvironmentVars = [
@@ -22,11 +20,7 @@ export const checkRequiredEnvironmentVariables = () => {
     'APPID_SECRET',
     'FALLBACK_LANGUAGE',
     'SUPPORTED_LANGUAGES',
-    'USE_REFRESH_TOKEN',
   ];
-  if (USE_REFRESH_TOKEN === 'true') {
-    requiredEnvironmentVars.push('REFRESH_TOKEN_DAYS');
-  }
 
   let missingCount = 0;
   requiredEnvironmentVars.forEach((envVar) => {
