@@ -42,6 +42,8 @@ yarn start
 ```
 NOTE: The "Build" step must be ran so the tsoa defined routes will work. 
 
+Access the Swagger-UI at http://localhost:3001/docs, and launch the React-AppID-UI project found in an adjacent repository.
+
 ## Docker Image
 Building:
 ```
