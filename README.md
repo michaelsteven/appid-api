@@ -2,11 +2,17 @@
 Stubbed out NodeJS REST API for interacting with the AppID Service. This is a work in progress.
 
 ## Environment Variables
+For running locally you can create a .env file at the root of the project with these key/value pairs.
+
 Required:
 ```
 IBMCLOUD_API_KEY="";
 APPID_SERVICE_ENDPOINT="https://us-south.appid.cloud.ibm.com";
 APPID_API_TENANT_ID="";
+APPID_CLIENT_ID=""
+APPID_SECRET=""
+SUPPORTED_LANGUAGES=en,fr_FR
+FALLBACK_LANGUAGE=en
 ```
 
 Optional:
