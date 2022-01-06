@@ -1,19 +1,25 @@
 {
-    "entryFile": "src/app.ts",
-    "noImplicitAdditionalProperties": "throw-on-extras",
-    "controllerPathGlobs": ["src/routes/*controller.ts"],
-    "spec": {
-        "outputDirectory": "./build/",
-        "specVersion": 3,
-        "basePath": "/api/v1"
-    },
-    "routes": {
-        "routesDir": "./build/",
-        "basePath": "/api/v1"
-    },
-    "swagger":{
-        "outputDirectory": "./build/",
-        "entryFile": "./src/app.ts"
+  "entryFile": "src/app.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/routes/*controller.ts"],
+  "spec": {
+    "outputDirectory": "./build/",
+    "specVersion": 3,
+    "basePath": "/api/v1"
+  },
+  "routes": {
+    "routesDir": "./build/",
+    "basePath": "/api/v1",
+    "authenticationModule": "./src/authentication.ts"
+  },
+  "swagger":{
+    "outputDirectory": "./build/",
+    "entryFile": "./src/app.ts",
+    "securityDefinitions": {
+        "jwt": {
+            "name": "jwt",
+            "type": "jwt"
+        }
     }
-
+  }
 }

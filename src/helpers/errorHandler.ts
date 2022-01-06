@@ -7,25 +7,15 @@ export default (app: Express) => {
     (error: any, _request: ExRequest, response: ExResponse, next: NextFunction) => {
       if (error) {
         if (error.status === 401) {
-          response.statusCode = 401;
-          const msg = {
-            error: error.message || 'Unauthorized',
-          };
-          msg.error = error.name
-            ? `${error.name}: ${error.message}`
-            : error.message;
-          response.end(JSON.stringify(msg));
+          return response.status(401).json({
+            message: error.message
+          });
         }
 
         if (error.status === 404) {
-          response.statusCode = 404;
-          const msg = {
-            error: error.message || 'Not Found',
-          };
-          msg.error = error.name
-            ? `${error.name}: ${error.message}`
-            : error.message;
-          response.end(JSON.stringify(msg));
+          return response.status(404).json({
+            message: error.message
+          });
         }
 
         if (error instanceof ValidateError) {
