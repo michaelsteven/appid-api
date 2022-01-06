@@ -6,5 +6,6 @@ import {
 
 export const getLocale = (exRequest: ExRequest) => {
   const language = exRequest.acceptsLanguages(SUPPORTED_LANGUAGES ? SUPPORTED_LANGUAGES.split(',') : ['']);
-  return language || FALLBACK_LANGUAGE || 'en';
+  const resolvedLanguage = language || FALLBACK_LANGUAGE || 'en';
+  return resolvedLanguage;
 };

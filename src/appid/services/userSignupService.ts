@@ -1,7 +1,7 @@
 import { ApiError } from '../../helpers/errors';
 import colors from 'colors';
 import { User } from '../models/user';
-import { cloudDirectoryProfileRemove } from '../apis';
+import { cloudDirectoryProfileRemove, signup as apiSignup } from '../apis';
 import { getAppIdentityToken } from './tokenService';
 import { IBMCLOUD_API_KEY, APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
 
@@ -23,7 +23,8 @@ const selfServiceManager = new SelfServiceManager({
 export async function signup (firstName : string, lastName : string, email: string, password : string, locale : string) {
   const user = buildSignupUser(firstName, lastName, email, password);
 
-  const appIdUser = await selfServiceSignup(user, locale);
+  // const appIdUser = await selfServiceSignup(user, locale);
+  const appIdUser = await apiSignup(user, locale);
   const { id: cloudDirectoyId } = appIdUser;
   try {
     if (appIdUser) {
@@ -55,8 +56,10 @@ export async function signup (firstName : string, lastName : string, email: stri
 };
 
 /**
- * Signup
+ * Signup via the SelfServiceManager in the appid node sdk
  * @param user User
+ * NOTE:  The locale setting didn't work for me, so currently not using this method.
+ *        Leaving it here for future troubleshooting.
  */
 export async function selfServiceSignup (user: User, locale: string) {
   const iamToken = getAppIdentityToken();

@@ -1,6 +1,7 @@
 import { awaitFetch } from '../../helpers/utilities';
 import { setBearerToken } from './bearerToken';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
+import { User } from '../models/user';
 
 /**
  * Remove profile
@@ -26,16 +27,36 @@ export const cloudDirectoryProfileRemove = async (id: number): Promise<any> => {
  * @param locale locale
  * @returns user info
  */
-export const forgotPassword = async (username: string, locale : string): Promise<any> => {
+export const forgotPassword = async (username: string, acceptLanguage : string): Promise<any> => {
   const bearerToken = await setBearerToken();
-  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/forgot_password?language=${locale}`;
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/forgot_password?language=${acceptLanguage}`;
   const options = {
     method: 'POST',
     body: JSON.stringify({ user: username }),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${bearerToken}`,
+      'Accept-Language': acceptLanguage,
     }
   };
+  console.log(url);
+  console.log(options);
+  return awaitFetch(url, options);
+};
+
+export const signup = async (user: User, acceptLanguage : string): Promise<any> => {
+  const bearerToken = await setBearerToken();
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/sign_up?language=${acceptLanguage}`;
+  const options = {
+    method: 'POST',
+    body: JSON.stringify(user),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${bearerToken}`,
+      'Accept-Language': acceptLanguage,
+    }
+  };
+  console.log(url);
+  console.log(options);
   return awaitFetch(url, options);
 };
