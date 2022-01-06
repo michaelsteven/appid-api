@@ -1,6 +1,12 @@
 # appid-api
 Stubbed out NodeJS REST API for interacting with the AppID Service. This is a work in progress.
 
+## Prerequisites
+1) An IBM Cloud account
+2) Provisioned instance of IBM Cloud AppID in your account
+3) AppID Cloud Directory enabled
+4) An "Application" defined in AppID with roles and scopes.
+
 ## Environment Variables
 For running locally you can create a .env file at the root of the project with these key/value pairs.
 
@@ -17,8 +23,24 @@ FALLBACK_LANGUAGE=en
 
 Optional:
 ```
-PORT=8080
+PORT=3001
 ```
+
+## Running Locally
+Create a .env file at the root of the project with the key/value pairs above, including the PORT=3001.
+
+```
+npm install
+npm run build
+npm run start
+```
+or
+```
+yarn
+yarn build
+yarn start
+```
+NOTE: The "Build" step must be ran so the tsoa defined routes will work. 
 
 ## Docker Image
 Building:
