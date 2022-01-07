@@ -8,7 +8,7 @@ export class sampleController extends Controller {
   @SuccessResponse(200, 'Says Hello')
   @Get('/sayhello')
   @Security('jwt', ['foo'])
-  public supportedLanguagesGet2 (
+  public sayHello (
   ): Promise<any> {
     return Promise.resolve(JSON.stringify({ message: 'hello' }));
   }

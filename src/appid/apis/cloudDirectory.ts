@@ -42,8 +42,6 @@ export const forgotPassword = async (username: string, acceptLanguage : string):
       'Accept-Language': acceptLanguage,
     }
   };
-  console.log(url);
-  console.log(options);
   return awaitFetch(url, options);
 };
 
@@ -55,18 +53,19 @@ export const forgotPassword = async (username: string, acceptLanguage : string):
  */
 export const forgotPasswordConfirmationResult = async (context: string, acceptLanguage: string): Promise<ForgotPasswordConfirmationResult> => {
   const bearerToken = await setBearerToken();
-  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/forgot_password/confirmation_result}`;
+  const formData = new URLSearchParams();
+  formData.append('context', context);
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/forgot_password/confirmation_result`;
   const options = {
     method: 'POST',
-    body: JSON.stringify({ user: context }),
+    body: formData.toString(),
     headers: {
-      'Content-Type': 'application/json',
+      accept: 'application/json',
       Authorization: `Bearer ${bearerToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
       'Accept-Language': acceptLanguage,
     }
   };
-  console.log(url);
-  console.log(options);
   return awaitFetch(url, options);
 };
 
@@ -79,7 +78,7 @@ export const forgotPasswordConfirmationResult = async (context: string, acceptLa
  */
 export const changePassword = async (payload: ChangePasswordPayload, acceptLanguage: string): Promise<CloudDirectoryUser> => {
   const bearerToken = await setBearerToken();
-  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/change_password}`;
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/change_password`;
   const options = {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -89,8 +88,6 @@ export const changePassword = async (payload: ChangePasswordPayload, acceptLangu
       'Accept-Language': acceptLanguage,
     }
   };
-  console.log(url);
-  console.log(options);
   return awaitFetch(url, options);
 };
 
@@ -112,7 +109,5 @@ export const signup = async (user: User, acceptLanguage : string): Promise<any> 
       'Accept-Language': acceptLanguage,
     }
   };
-  console.log(url);
-  console.log(options);
   return awaitFetch(url, options);
 };
