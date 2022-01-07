@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, Put, Request, Response, Route, SuccessResponse } from 'tsoa';
+import { Body, Controller, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile } from '../appid/services';
+import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword } from '../appid/services';
 import colors from 'colors';
 
 @Route('appid')
@@ -28,14 +28,14 @@ export class appIdUserController extends Controller {
     const response = await signup(firstName, lastName, email, password, locale);
     this.setStatus(201);
     return response;
-  }
+  };
 
   /**
    * Login with Username and Password
    */
+  @Post('/login')
   @Response<ApiError>(500, 'Failed to login')
   @SuccessResponse(200, 'Successful Login')
-  @Post('/login')
   public async loginWithUsernamePassword (
     @Request() exRequest: ExRequest,
     @Body() body: {
@@ -58,13 +58,13 @@ export class appIdUserController extends Controller {
       console.log('\n');
       throw error;
     }
-  }
+  };
 
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  @SuccessResponse(200, 'Successful Login')
+  @SuccessResponse(201, 'Forgot password email sent')
   @Post('/forgotpwd')
   public async forgotPassword (
     @Request() exRequest: ExRequest,
@@ -77,13 +77,13 @@ export class appIdUserController extends Controller {
     const jsonResponse = await forgotPassword(username, locale);
     this.setStatus(201);
     return JSON.stringify(jsonResponse);
-  }
+  };
 
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  @SuccessResponse(200, 'Successful Login')
+  @SuccessResponse(200, 'Password is reset')
   @Post('/forgotpwd/reset')
   public async forgotPasswordReset (
     @Request() exRequest: ExRequest,
@@ -94,9 +94,53 @@ export class appIdUserController extends Controller {
   ) : Promise<string> {
     const { newPassword, context } = body;
     const locale = getLocale(exRequest);
-    const jsonResponse = await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
-    this.setStatus(201);
-    return JSON.stringify(jsonResponse);
+    const cloudDirectoryUser = await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
+    this.setStatus(200);
+    return JSON.stringify(cloudDirectoryUser);
+  };
+
+  @Post('/changepwd')
+  @Security('jwt', ['appid_authenticated'])
+  @SuccessResponse(200, 'Successful Login')
+  @Response(400, 'The request body is missing or invalid')
+  @Response(401, 'The user is unauthorized.')
+  @Response(403, 'Insufficient permissions.')
+  @Response(409, 'User account not verified.')
+  public async changePassword (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      newPassword: string;
+      uuid: string;
+      changedIpAddress? : string;
+    }
+  ) : Promise<string> {
+    // TODO: decode the bearer token and verify the sub matches the uuid passed in
+    // users calling this endpoint can only change their own password
+    const locale = getLocale(exRequest);
+    const cloudDirectoryUser = await changePassword(body, locale);
+    this.setStatus(200);
+    return JSON.stringify(cloudDirectoryUser);
+  };
+
+  @Post('/changepwdforuser')
+  @Security('jwt', ['appid_authenticated', 'administrator'])
+  @SuccessResponse(200, 'Successful Login')
+  @Response(400, 'The request body is missing or invalid')
+  @Response(401, 'The user is unauthorized.')
+  @Response(403, 'Insufficient permissions.')
+  @Response(409, 'User account not verified.')
+  public async changePasswordForUser (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      newPassword: string;
+      uuid: string;
+      changedIpAddress? : string;
+    }
+  ) : Promise<string> {
+    const locale = getLocale(exRequest);
+    const cloudDirectoryUser = await changePassword(body, locale);
+    this.setStatus(200);
+    return JSON.stringify(cloudDirectoryUser);
   }
 
   /**

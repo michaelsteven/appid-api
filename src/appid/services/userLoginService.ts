@@ -3,7 +3,7 @@ import {
   loginWithCredentials as apiLoginWithCredentials,
   forgotPassword as apiForgotPassword,
   forgotPasswordConfirmationResult,
-  changePassword,
+  changePassword as apiChangePassword,
 } from '../apis';
 import { getLocale } from '../../helpers/locale';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
@@ -42,9 +42,13 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
   const confirmationResult = await forgotPasswordConfirmationResult(context, locale);
   const { success, uuid } = confirmationResult;
   if (success === true) {
-    const cloudDirectoryUser = await changePassword({ newPassword: newPassword, uuid: uuid }, locale);
+    const cloudDirectoryUser = await apiChangePassword({ newPassword: newPassword, uuid: uuid }, locale);
     return cloudDirectoryUser;
   } else {
     throw new ApiError(401, 'Context Rejected');
   }
 };
+
+export async function changePassword (payload: {newPassword: string; uuid: string; changedIpAddress?:string}, locale: string) : Promise<CloudDirectoryUser> {
+  return await apiChangePassword(payload, locale);
+}
