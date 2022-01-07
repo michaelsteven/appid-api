@@ -1,5 +1,5 @@
 export { setBearerToken } from './bearerToken';
-export { cloudDirectoryProfileRemove, forgotPassword, signup } from './cloudDirectory';
+export { signup, cloudDirectoryProfileRemove, forgotPassword, forgotPasswordConfirmationResult, changePassword } from './cloudDirectory';
 export { userProfile } from './userProfile';
 export { loginWithCredentials } from './login';
 export { getSupportedLanguages, putSupportedLanguages } from './language';

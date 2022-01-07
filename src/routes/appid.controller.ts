@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Put, Request, Response, Route, SuccessResp
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { signup, loginWithCredentials, forgotPassword, getSupportedLanguages, setSupportedLanguages, getUserProfile } from '../appid/services';
+import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile } from '../appid/services';
 import colors from 'colors';
 
 @Route('appid')
@@ -75,6 +75,26 @@ export class appIdUserController extends Controller {
     const { username } = body;
     const locale = getLocale(exRequest);
     const jsonResponse = await forgotPassword(username, locale);
+    this.setStatus(201);
+    return JSON.stringify(jsonResponse);
+  }
+
+  @Response(400, 'The request body is missing or invalid')
+  @Response(401, 'The user is unauthorized.')
+  @Response(403, 'Insufficient permissions.')
+  @Response(409, 'User account not verified.')
+  @SuccessResponse(200, 'Successful Login')
+  @Post('/forgotpwd/reset')
+  public async forgotPasswordReset (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      newPassword: string;
+      context: string;
+    }
+  ) : Promise<string> {
+    const { newPassword, context } = body;
+    const locale = getLocale(exRequest);
+    const jsonResponse = await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
     this.setStatus(201);
     return JSON.stringify(jsonResponse);
   }

@@ -2,9 +2,12 @@ import { Request as ExRequest, } from 'express';
 import {
   loginWithCredentials as apiLoginWithCredentials,
   forgotPassword as apiForgotPassword,
+  forgotPasswordConfirmationResult,
+  changePassword,
 } from '../apis';
 import { getLocale } from '../../helpers/locale';
-import { ForgotPasswordUser } from '../models/ForgotPasswordUser';
+import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
+import { ApiError } from '../../helpers/errors';
 
 /**
  * Login with Credentials
@@ -24,6 +27,24 @@ export async function loginWithCredentials (username: string, password: string, 
  * @param locale locale
  * @returns ForgotPasswordUser
  */
-export async function forgotPassword (username: string, locale: string) : Promise<ForgotPasswordUser> {
+export async function forgotPassword (username: string, locale: string) : Promise<CloudDirectoryUser> {
   return await apiForgotPassword(username, locale);
+};
+
+/**
+ * Forgot Password Confirmation Validate And Change
+ * @param password the new password
+ * @param context the context
+ * @param locale the locale
+ */
+export async function forgotPasswordConfirmationValidationAndChange (newPassword: string, context: string, locale: string): Promise<CloudDirectoryUser> {
+  // make API call to validate the confirmation context, which will return the user's UUID and a status
+  const confirmationResult = await forgotPasswordConfirmationResult(context, locale);
+  const { success, uuid } = confirmationResult;
+  if (success === true) {
+    const cloudDirectoryUser = await changePassword({ newPassword: newPassword, uuid: uuid }, locale);
+    return cloudDirectoryUser;
+  } else {
+    throw new ApiError(401, 'Context Rejected');
+  }
 };

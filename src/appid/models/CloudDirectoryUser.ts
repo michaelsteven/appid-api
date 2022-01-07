@@ -3,7 +3,7 @@ interface Email {
   primary: boolean;
 }
 
-export interface ForgotPasswordUser {
+export interface CloudDirectoryUser {
   displayName: string;
   active: boolean;
   emails: Array<Email>;
