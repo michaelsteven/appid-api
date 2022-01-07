@@ -1,8 +1,9 @@
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
 import { setBearerToken } from './bearerToken';
 import { awaitFetch } from '../../helpers/utilities';
+import { UserProfile } from '../models/UserProfile';
 
-export const userProfile = async (profileId: number) => {
+export const getUserProfile = async (profileId: string) : Promise<UserProfile> => {
   const bearerToken = await setBearerToken();
   const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/users/${profileId}/profile`;
   const options = {

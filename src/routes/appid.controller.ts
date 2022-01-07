@@ -2,8 +2,10 @@ import { Body, Controller, Get, Post, Put, Request, Response, Route, Security, S
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword } from '../appid/services';
+import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword as svcChangePassword } from '../appid/services';
 import colors from 'colors';
+import { getAuthToken } from '../helpers/token';
+import { getUserProfileFromIdentityToken } from '../appid/services/userProfileService';
 
 @Route('appid')
 export class appIdUserController extends Controller {
@@ -110,14 +112,28 @@ export class appIdUserController extends Controller {
     @Request() exRequest: ExRequest,
     @Body() body: {
       newPassword: string;
-      uuid: string;
-      changedIpAddress? : string;
     }
   ) : Promise<string> {
-    // TODO: decode the bearer token and verify the sub matches the uuid passed in
-    // users calling this endpoint can only change their own password
+    // get the sub from the auth token
+    const authToken = getAuthToken(exRequest);
+    if (!authToken) {
+      throw new ApiError(401, 'Unauthorized');
+    }
+    const { sub } = authToken;
+
+    // get the identity id from the user profile using the sub
+    const userProfile = await getUserProfile(sub);
+    const { identities } = userProfile;
+    const { id: uuid } = identities[0];
+
+    // build the payload
+    const { newPassword } = body;
+    // const clientIp = exRequest.socket.remoteAddress;
+    const payload = { newPassword: newPassword, uuid: uuid };
     const locale = getLocale(exRequest);
-    const cloudDirectoryUser = await changePassword(body, locale);
+
+    // change the password
+    const cloudDirectoryUser = await svcChangePassword(payload, locale);
     this.setStatus(200);
     return JSON.stringify(cloudDirectoryUser);
   };
@@ -138,7 +154,7 @@ export class appIdUserController extends Controller {
     }
   ) : Promise<string> {
     const locale = getLocale(exRequest);
-    const cloudDirectoryUser = await changePassword(body, locale);
+    const cloudDirectoryUser = await svcChangePassword(body, locale);
     this.setStatus(200);
     return JSON.stringify(cloudDirectoryUser);
   }
@@ -152,7 +168,7 @@ export class appIdUserController extends Controller {
     @Request() exRequest: ExRequest
   ) {
     const { access_token: accessToken, id_token: idToken } = exRequest.cookies;
-    return getUserProfile(accessToken, idToken);
+    return getUserProfileFromIdentityToken(accessToken, idToken);
   }
 
   /**
@@ -183,4 +199,4 @@ export class appIdUserController extends Controller {
     this.setStatus(200);
     return jsonResponse;
   }
-}
+};

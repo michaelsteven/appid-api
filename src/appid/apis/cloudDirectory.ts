@@ -78,7 +78,7 @@ export const forgotPasswordConfirmationResult = async (context: string, acceptLa
  */
 export const changePassword = async (payload: ChangePasswordPayload, acceptLanguage: string): Promise<CloudDirectoryUser> => {
   const bearerToken = await setBearerToken();
-  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/change_password`;
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/change_password?language=${acceptLanguage}`;
   const options = {
     method: 'POST',
     body: JSON.stringify(payload),

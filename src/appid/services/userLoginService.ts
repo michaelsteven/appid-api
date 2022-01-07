@@ -49,6 +49,6 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
   }
 };
 
-export async function changePassword (payload: {newPassword: string; uuid: string; changedIpAddress?:string}, locale: string) : Promise<CloudDirectoryUser> {
+export async function changePassword (payload: {newPassword: string; uuid: string}, locale: string) : Promise<CloudDirectoryUser> {
   return await apiChangePassword(payload, locale);
 }
