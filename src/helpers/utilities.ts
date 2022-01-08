@@ -10,15 +10,19 @@ export const isJSON = (str: any) => {
   return true;
 };
 
-export const awaitFetch = async (url: string, options: any) => {
+export const awaitFetch = async (url: string, options: any): Promise<any> => {
   const response = await fetch(url, options).then((result) => result);
   return handleResponse(response);
 };
 
-export const handleResponse = async (response: Response) => {
+export const handleResponse = async (response: Response):Promise<any> => {
   if (response.ok) {
-    const json = await response.json();
-    return json;
+    if (response.bodyUsed) {
+      const json = await response.json();
+      return json;
+    } else {
+      return;
+    }
   }
   throw new ApiError(response.status, response.statusText);
 };

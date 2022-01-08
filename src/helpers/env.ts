@@ -1,4 +1,3 @@
-import colors from 'colors';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,11 +24,7 @@ export const checkRequiredEnvironmentVariables = () => {
   let missingCount = 0;
   requiredEnvironmentVars.forEach((envVar) => {
     if (!(envVar in process.env)) {
-      console.log(
-        colors.red(
-          `----- REQUIRED ENVIRONMENT VARIABLE ${envVar} IS MISSING -----`
-        )
-      );
+      console.log(`----- REQUIRED ENVIRONMENT VARIABLE ${envVar} IS MISSING -----`);
       missingCount++;
     }
   });

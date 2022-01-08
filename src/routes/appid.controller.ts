@@ -3,15 +3,22 @@ import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
 import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword as svcChangePassword } from '../appid/services';
-import { getAuthToken } from '../helpers/token';
-import { getUserProfileFromIdentityToken } from '../appid/services/userProfileService';
+import { getEncodedAccessToken } from '../helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
 import { AccessToken } from '../appid/models/AccessToken';
+import { Languages } from '../appid/models/Languages';
+import { UserProfile } from '../appid/models/UserProfile';
 
+/**
+ * AppId Controller
+ */
 @Route('appid')
-export class appIdUserController extends Controller {
+export class appIdController extends Controller {
   /**
-   * Signup - creates a new user
+   * Signup - User signup/registration
+   * @param exRequest - the express request
+   * @param body SignupUser
+   * @returns Promise<CloudDirectoryUser>
    */
   @Post('/signup')
   @SuccessResponse(201, 'Successfully created new user with id')
@@ -32,7 +39,10 @@ export class appIdUserController extends Controller {
   };
 
   /**
-   * Login with Username and Password
+   * Login - Authenticates a user and returns the the required tokens.
+   * @param exRequest - the express request
+   * @param body <username: string; password: string;>
+   * @returns Promise<AccessToken>
    */
   @Post('/login')
   @SuccessResponse(200, 'Successful Login')
@@ -48,6 +58,12 @@ export class appIdUserController extends Controller {
     return await loginWithCredentials(username, password, exRequest);
   };
 
+  /**
+   * Forgot Password - Starts the password reset process by sending the forgot password email.
+   * @param exRequest the express request
+   * @param body username
+   * @returns Promise<CloudDirectoryUser>
+   */
   @Post('/forgotpwd')
   @SuccessResponse(201, 'Forgot password email sent')
   @Response(400, 'Bad Request')
@@ -65,6 +81,13 @@ export class appIdUserController extends Controller {
     return await forgotPassword(username, locale);
   };
 
+  /**
+   * Forgot Password Reset - Validates the context supplied by the forgot password email
+   *                         then resets the password to the newPassword value.
+   * @param exRequest - the express request
+   * @param body {newPassword: string; context:string;}
+   * @returns Promise<CloudDirectoryUser>
+   */
   @Post('/forgotpwd/reset')
   @SuccessResponse(200, 'Password is reset')
   @Response(400, 'The request body is missing or invalid')
@@ -83,6 +106,12 @@ export class appIdUserController extends Controller {
     return await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
   };
 
+  /**
+   * Change Password - For an appid_authenticated user to change their own password.
+   * @param exRequest - the express request
+   * @param body - {newPassword: string;}
+   * @returns Promise<CloudDirectoryUser>
+   */
   @Post('/changepwd')
   @Security('jwt', ['appid_authenticated'])
   @SuccessResponse(200, 'Successful Login')
@@ -96,28 +125,27 @@ export class appIdUserController extends Controller {
       newPassword: string;
     }
   ) : Promise<CloudDirectoryUser> {
-    // get the sub from the auth token
-    const authToken = getAuthToken(exRequest);
-    if (!authToken) {
-      throw new ApiError(401, 'Unauthorized');
-    }
-    const { sub } = authToken;
-
-    // get the identity id from the user profile using the sub
-    const userProfile = await getUserProfile(sub);
+    // get the identity id from the user profile
+    const encodedAccessToken = getEncodedAccessToken(exRequest) || '';
+    const userProfile = await getUserProfile(encodedAccessToken);
     const { identities } = userProfile;
     const { id: uuid } = identities[0];
 
-    // build the payload
+    // build the payload and change the password
     const { newPassword } = body;
     // const clientIp = exRequest.socket.remoteAddress;
     const payload = { newPassword: newPassword, uuid: uuid };
     const locale = getLocale(exRequest);
-
-    // change the password
     return await svcChangePassword(payload, locale);
   };
 
+  /**
+   * Change Password for user.  This endpoint is for an administrator to change someone else's password.
+   *                            Must be appid_authenticated and an administrator.
+   * @param exRequest - the express request
+   * @param body {newPassword: string; uuid: string; changedIpAddress?:string; }
+   * @returns Promise<CloudDirectoryUser>
+   */
   @Post('/changepwdforuser')
   @Security('jwt', ['appid_authenticated', 'administrator'])
   @SuccessResponse(200, 'Successful Login')
@@ -138,40 +166,50 @@ export class appIdUserController extends Controller {
   }
 
   /**
-   * Get Profile
+   * Get Profile - for a User to retrieve their own profile
+   * @param exRequest - the express request
+   * @returns Promise<UserProfile>
    */
   @Get('/profile')
+  @Security('jwt', ['appid_authenticated'])
   @SuccessResponse(200, 'Gets Profile')
   public getProfile (
     @Request() exRequest: ExRequest
-  ) {
-    const { access_token: accessToken, id_token: idToken } = exRequest.cookies;
-    return getUserProfileFromIdentityToken(accessToken, idToken);
+  ):Promise<UserProfile> {
+    const encodedAccessToken = getEncodedAccessToken(exRequest) || '';
+    return getUserProfile(encodedAccessToken);
   }
 
   /**
-   * Get Supported Languages
+   * Get Languages - Get supported languages set in the appid instance.
+   * @param exRequest -- the express request
+   * @returns Promise<Languages>
    */
   @Get('/languages')
   @SuccessResponse(200, 'Gets Supported Languages')
   public supportedLanguagesGet (
     @Request() exRequest: ExRequest
-  ) {
+  ): Promise<Languages> {
     const locale = getLocale(exRequest);
     return getSupportedLanguages(locale);
   }
 
   /**
-   * Put Supported Languages
+   * Put Languages - Sets the supported languages for the appid instance.
+   *                 Must be appid_authenticated and an administrator
+   * @param exRequest - the express request
+   * @param body Languages
+   * @returns void
    */
   @Put('/languages')
-  @SuccessResponse(200, 'Puts Supported Languages')
+  @Security('jwt', ['appid_authenticated', 'administrator'])
+  @SuccessResponse(204, 'No Content')
   public async supporteedLanguagesPut (
     @Request() exRequest: ExRequest,
     @Body() body: {
       languages: Array<string>;
     }
-  ) {
+  ): Promise<void> {
     const locale = getLocale(exRequest);
     return await setSupportedLanguages(body, locale);
   }

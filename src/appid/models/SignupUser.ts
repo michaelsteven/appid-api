@@ -3,7 +3,7 @@ interface Email {
   primary: boolean;
 }
 
-export interface User {
+export interface SignupUser {
   active: boolean;
   emails: Array<Email>;
   userName: string;

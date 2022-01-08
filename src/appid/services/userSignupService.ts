@@ -1,6 +1,5 @@
 import { ApiError } from '../../helpers/errors';
-import colors from 'colors';
-import { User } from '../models/User';
+import { SignupUser } from '../models/SignupUser';
 import { cloudDirectoryProfileRemove, signup as apiSignup } from '../apis';
 import { getAppIdentityToken } from './tokenService';
 import { IBMCLOUD_API_KEY, APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
@@ -41,14 +40,14 @@ export async function signup (firstName : string, lastName : string, email: stri
           cloudDirectoyId
         );
         console.log('\n');
-        console.log(colors.bold('----- rollback app_id user -----'));
-        console.log(rollbackProfile ? colors.red(rollbackProfile) : '');
+        console.log('----- rollback app_id user -----');
+        console.log(rollbackProfile || '');
         console.log('\n');
       } catch (error) {
         console.log('\n');
-        console.log(colors.bold('----- rollback app_id user -----'));
-        console.log(colors.red('Failed to rollback app_id.'));
-        console.log(colors.red(JSON.stringify(error)));
+        console.log('----- rollback app_id user -----');
+        console.log('Failed to rollback app_id.');
+        console.log(JSON.stringify(error));
         console.log('\n');
       }
     }
@@ -62,7 +61,7 @@ export async function signup (firstName : string, lastName : string, email: stri
  * NOTE:  The locale setting didn't work for me, so currently not using this method.
  *        Leaving it here for future troubleshooting.
  */
-export async function selfServiceSignup (user: User, locale: string) {
+export async function selfServiceSignup (user: SignupUser, locale: string) {
   const iamToken = getAppIdentityToken();
   return await selfServiceManager.signUp(user, locale, iamToken).then((result:any) => result);
 };
@@ -75,7 +74,7 @@ export async function selfServiceSignup (user: User, locale: string) {
  * @param password string
  * @returns user
  */
-const buildSignupUser = (firstName : string, lastName : string, email: string, password: string) : User => {
+const buildSignupUser = (firstName : string, lastName : string, email: string, password: string) : SignupUser => {
   const user = {
     active: true,
     emails: [

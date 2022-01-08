@@ -1,7 +1,7 @@
 import { awaitFetch } from '../../helpers/utilities';
 import { setBearerToken } from './bearerToken';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
-import { User } from '../models/User';
+import { User } from '../models/SignupUser';
 import { ForgotPasswordConfirmationResult } from '../models/ForgotPasswordConfirmationResult';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ChangePasswordPayload } from '../models/ChangePasswordPayload';
