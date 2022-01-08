@@ -3,18 +3,19 @@ import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
 import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword as svcChangePassword } from '../appid/services';
-import colors from 'colors';
 import { getAuthToken } from '../helpers/token';
 import { getUserProfileFromIdentityToken } from '../appid/services/userProfileService';
+import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
+import { AccessToken } from '../appid/models/AccessToken';
 
 @Route('appid')
 export class appIdUserController extends Controller {
   /**
-   * Posts new user.
+   * Signup - creates a new user
    */
-  @Response<ApiError>(500, 'Failed to create user')
-  @SuccessResponse(201, 'Successfully created new user with id')
   @Post('/signup')
+  @SuccessResponse(201, 'Successfully created new user with id')
+  @Response<ApiError>(409, 'The email address is already taken')
   public async createUser (
     @Request() exRequest: ExRequest,
     @Body()
@@ -24,81 +25,62 @@ export class appIdUserController extends Controller {
       email: string;
       password: string;
     }
-  ): Promise<any> {
+  ): Promise<CloudDirectoryUser> {
     const { firstName, lastName, email, password } = body;
     const locale = getLocale(exRequest);
-    const response = await signup(firstName, lastName, email, password, locale);
-    this.setStatus(201);
-    return response;
+    return await signup(firstName, lastName, email, password, locale);
   };
 
   /**
    * Login with Username and Password
    */
   @Post('/login')
-  @Response<ApiError>(500, 'Failed to login')
   @SuccessResponse(200, 'Successful Login')
+  @Response<ApiError>(400, 'Invalid email or password')
   public async loginWithUsernamePassword (
     @Request() exRequest: ExRequest,
     @Body() body: {
       username: string;
       password: string;
     }
-  ): Promise<string> {
+  ): Promise<AccessToken> {
     const { username, password } = body;
-    try {
-      const response = await loginWithCredentials(username, password, exRequest);
-      if (response) {
-        return response;
-      } else {
-        console.log('An error occurred');
-        throw new ApiError(500, 'Failed to log into App ID account.');
-      }
-    } catch (error) {
-      console.log('\n');
-      console.log(colors.red(JSON.stringify(error)));
-      console.log('\n');
-      throw error;
-    }
+    return await loginWithCredentials(username, password, exRequest);
   };
 
-  @Response(400, 'The request body is missing or invalid')
+  @Post('/forgotpwd')
+  @SuccessResponse(201, 'Forgot password email sent')
+  @Response(400, 'Bad Request')
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  @SuccessResponse(201, 'Forgot password email sent')
-  @Post('/forgotpwd')
   public async forgotPassword (
     @Request() exRequest: ExRequest,
     @Body() body: {
       username: string;
     }
-  ) : Promise<string> {
+  ) : Promise<CloudDirectoryUser> {
     const { username } = body;
     const locale = getLocale(exRequest);
-    const jsonResponse = await forgotPassword(username, locale);
-    this.setStatus(201);
-    return JSON.stringify(jsonResponse);
+    return await forgotPassword(username, locale);
   };
 
+  @Post('/forgotpwd/reset')
+  @SuccessResponse(200, 'Password is reset')
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  @SuccessResponse(200, 'Password is reset')
-  @Post('/forgotpwd/reset')
   public async forgotPasswordReset (
     @Request() exRequest: ExRequest,
     @Body() body: {
       newPassword: string;
       context: string;
     }
-  ) : Promise<string> {
+  ) : Promise<CloudDirectoryUser> {
     const { newPassword, context } = body;
     const locale = getLocale(exRequest);
-    const cloudDirectoryUser = await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
-    this.setStatus(200);
-    return JSON.stringify(cloudDirectoryUser);
+    return await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
   };
 
   @Post('/changepwd')
@@ -113,7 +95,7 @@ export class appIdUserController extends Controller {
     @Body() body: {
       newPassword: string;
     }
-  ) : Promise<string> {
+  ) : Promise<CloudDirectoryUser> {
     // get the sub from the auth token
     const authToken = getAuthToken(exRequest);
     if (!authToken) {
@@ -133,9 +115,7 @@ export class appIdUserController extends Controller {
     const locale = getLocale(exRequest);
 
     // change the password
-    const cloudDirectoryUser = await svcChangePassword(payload, locale);
-    this.setStatus(200);
-    return JSON.stringify(cloudDirectoryUser);
+    return await svcChangePassword(payload, locale);
   };
 
   @Post('/changepwdforuser')
@@ -152,18 +132,16 @@ export class appIdUserController extends Controller {
       uuid: string;
       changedIpAddress? : string;
     }
-  ) : Promise<string> {
+  ) : Promise<CloudDirectoryUser> {
     const locale = getLocale(exRequest);
-    const cloudDirectoryUser = await svcChangePassword(body, locale);
-    this.setStatus(200);
-    return JSON.stringify(cloudDirectoryUser);
+    return await svcChangePassword(body, locale);
   }
 
   /**
    * Get Profile
    */
-  @SuccessResponse(200, 'Gets Profile')
   @Get('/profile')
+  @SuccessResponse(200, 'Gets Profile')
   public getProfile (
     @Request() exRequest: ExRequest
   ) {
@@ -174,8 +152,8 @@ export class appIdUserController extends Controller {
   /**
    * Get Supported Languages
    */
-  @SuccessResponse(200, 'Gets Supported Languages')
   @Get('/languages')
+  @SuccessResponse(200, 'Gets Supported Languages')
   public supportedLanguagesGet (
     @Request() exRequest: ExRequest
   ) {
@@ -186,8 +164,8 @@ export class appIdUserController extends Controller {
   /**
    * Put Supported Languages
    */
-  @SuccessResponse(200, 'Puts Supported Languages')
   @Put('/languages')
+  @SuccessResponse(200, 'Puts Supported Languages')
   public async supporteedLanguagesPut (
     @Request() exRequest: ExRequest,
     @Body() body: {
@@ -195,8 +173,6 @@ export class appIdUserController extends Controller {
     }
   ) {
     const locale = getLocale(exRequest);
-    const jsonResponse = await setSupportedLanguages(body, locale);
-    this.setStatus(200);
-    return jsonResponse;
+    return await setSupportedLanguages(body, locale);
   }
 };

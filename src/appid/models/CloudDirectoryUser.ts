@@ -12,11 +12,13 @@ export interface CloudDirectoryUser {
     lastModified: Date;
     resourceType: string;
   }
-  schemas: [String];
+  schemas: Array<string>;
   name: {
     givenName: string;
     familyName: string;
     formatted: string;
   }
   id: string;
+  status: string;
+  userName: string;
 }

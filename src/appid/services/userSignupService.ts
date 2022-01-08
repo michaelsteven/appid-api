@@ -1,9 +1,10 @@
 import { ApiError } from '../../helpers/errors';
 import colors from 'colors';
-import { User } from '../models/user';
+import { User } from '../models/User';
 import { cloudDirectoryProfileRemove, signup as apiSignup } from '../apis';
 import { getAppIdentityToken } from './tokenService';
 import { IBMCLOUD_API_KEY, APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
+import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 
 const SelfServiceManager = require('ibmcloud-appid').SelfServiceManager;
 const selfServiceManager = new SelfServiceManager({
@@ -20,7 +21,7 @@ const selfServiceManager = new SelfServiceManager({
  * @param locale string
  * @returns user
  */
-export async function signup (firstName : string, lastName : string, email: string, password : string, locale : string) {
+export async function signup (firstName : string, lastName : string, email: string, password : string, locale : string): Promise<CloudDirectoryUser> {
   const user = buildSignupUser(firstName, lastName, email, password);
 
   // const appIdUser = await selfServiceSignup(user, locale);
@@ -74,7 +75,7 @@ export async function selfServiceSignup (user: User, locale: string) {
  * @param password string
  * @returns user
  */
-const buildSignupUser = (firstName : string, lastName : string, email: string, password: string) => {
+const buildSignupUser = (firstName : string, lastName : string, email: string, password: string) : User => {
   const user = {
     active: true,
     emails: [

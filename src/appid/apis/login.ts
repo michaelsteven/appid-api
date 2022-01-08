@@ -1,8 +1,8 @@
-import fetch from 'cross-fetch';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID, APPID_CLIENT_ID, APPID_SECRET } from '../../helpers/env';
-import { ApiError } from '../../helpers/errors';
+import { awaitFetch } from '../../helpers/utilities';
+import { AccessToken } from '../models/AccessToken';
 
-export const loginWithCredentials = async (username: string, password: string, locale: string) => {
+export const loginWithCredentials = async (username: string, password: string, locale: string): Promise<AccessToken> => {
   const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/token`;
   const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
   const options = {
@@ -19,14 +19,5 @@ export const loginWithCredentials = async (username: string, password: string, l
       'Accept-Language': locale,
     },
   };
-  const response = await fetch(url, options).then((result) => result);
-  if (response.ok) {
-    const json = await response.json();
-    return json;
-  }
-  // change the 400 error into a 401
-  if (response.status === 400) {
-    throw new ApiError(401, 'Invalid email or password', locale);
-  }
-  throw new ApiError(response.status, response.statusText);
+  return awaitFetch(url, options);
 };

@@ -8,6 +8,7 @@ import {
 import { getLocale } from '../../helpers/locale';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ApiError } from '../../helpers/errors';
+import { AccessToken } from '../models/AccessToken';
 
 /**
  * Login with Credentials
@@ -16,9 +17,10 @@ import { ApiError } from '../../helpers/errors';
  * @param exRequest ExRequest
  * @returns []
  */
-export async function loginWithCredentials (username: string, password: string, exRequest: ExRequest) {
+export async function loginWithCredentials (username: string, password: string, exRequest: ExRequest): Promise<AccessToken> {
   const locale = getLocale(exRequest);
-  return await apiLoginWithCredentials(username, password, locale);
+  const response = await apiLoginWithCredentials(username, password, locale);
+  return response;
 };
 
 /**
