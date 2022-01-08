@@ -1,6 +1,6 @@
 import jwtDecode from 'jwt-decode';
 import { Request as ExRequest } from 'express';
-import { DecodedToken } from '../appid/models/DecodedToken';
+import { DecodedToken } from '../appid/models/AccessToken';
 
 export const getAuthToken = (exRequest: ExRequest): DecodedToken | undefined => {
   const { authorization } = exRequest.headers;

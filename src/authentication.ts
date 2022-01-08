@@ -1,6 +1,6 @@
 import * as express from 'express';
 import jwtDecode from 'jwt-decode';
-import { DecodedToken } from './appid/models/DecodedToken';
+import { AccessToken } from './appid/models/AccessToken';
 // import { APPID_CLIENT_ID, APPID_API_TENANT_ID } from './helpers/env';
 
 export function expressAuthentication (request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
@@ -12,7 +12,7 @@ export function expressAuthentication (request: express.Request, securityName: s
         reject(Error('Unauthorized. No authorization header of type Bearer present'));
       } else {
         const token = authorization.replace(/Bearer (.*)$/, '$1');
-        const decodedToken = jwtDecode(token) as DecodedToken;
+        const decodedToken = jwtDecode(token) as AccessToken;
         // TODO: verify token signature
         // TODO: Verify token tenant
         // TODO: Verify token client id against aud: Array<string>
@@ -31,12 +31,12 @@ export function expressAuthentication (request: express.Request, securityName: s
 
 /**
  * ContainsScopes
- * @param decodedToken decoded JWT token
+ * @param accessToken decoded JWT token
  * @param requiredScopesArray scopes required on the endpoint
  * @returns boolean
  */
-const containsRequiredScopes = (decodedToken:DecodedToken, requiredScopesArray: Array<string>) => {
-  const tokenScopesArray = decodedToken.scope.split(' ') as Array<string>;
+const containsRequiredScopes = (accessToken:AccessToken, requiredScopesArray: Array<string>) => {
+  const tokenScopesArray = accessToken.scope.split(' ') as Array<string>;
   for (const requiredScope of requiredScopesArray) {
     if (!tokenScopesArray.includes(requiredScope)) {
       return false;

@@ -1,4 +1,4 @@
-export interface DecodedToken {
+export interface AccessToken {
   iss: string;
   exp: number;
   aud: Array<string>;
