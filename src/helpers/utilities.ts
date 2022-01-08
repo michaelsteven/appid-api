@@ -17,7 +17,7 @@ export const awaitFetch = async (url: string, options: any): Promise<any> => {
 
 export const handleResponse = async (response: Response):Promise<any> => {
   if (response.ok) {
-    if (response.bodyUsed) {
+    if (response.status !== 204) {
       const json = await response.json();
       return json;
     } else {

@@ -1,7 +1,7 @@
 import { awaitFetch } from '../../helpers/utilities';
 import { setBearerToken } from './bearerToken';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
-import { User } from '../models/SignupUser';
+import { SignupUser } from '../models/SignupUser';
 import { ForgotPasswordConfirmationResult } from '../models/ForgotPasswordConfirmationResult';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ChangePasswordPayload } from '../models/ChangePasswordPayload';
@@ -97,7 +97,7 @@ export const changePassword = async (payload: ChangePasswordPayload, acceptLangu
  * @param acceptLanguage the accept language
  * @returns the user info
  */
-export const signup = async (user: User, acceptLanguage : string): Promise<CloudDirectoryUser> => {
+export const signup = async (user: SignupUser, acceptLanguage : string): Promise<CloudDirectoryUser> => {
   const bearerToken = await setBearerToken();
   const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/sign_up?language=${acceptLanguage}`;
   const options = {
