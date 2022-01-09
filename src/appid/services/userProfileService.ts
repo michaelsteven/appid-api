@@ -3,7 +3,7 @@ import {
   APPID_API_TENANT_ID,
 } from '../../helpers/env';
 import { getSub } from '../../helpers/token';
-import { getUserProfile as apiGetUserProfile } from '../apis/userProfile';
+import { getProfileForUser as apiGetUserProfile } from '../apis/userProfile';
 import { UserProfile } from '../models/UserProfile';
 const userProfileManager = require('ibmcloud-appid').UserProfileManager;
 
@@ -30,5 +30,5 @@ export const getUserProfileFromIdentityToken = (accessToken: string, identityTok
  */
 export const getUserProfile = async (encodedAccessToken: string): Promise<UserProfile> => {
   const sub = getSub(encodedAccessToken) || '';
-  return await apiGetUserProfile(encodedAccessToken, sub);
+  return await apiGetUserProfile(sub);
 };

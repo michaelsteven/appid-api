@@ -5,6 +5,10 @@ import { UserProfile } from '../models/UserProfile';
 
 /**
  * Get User Profile - for a user to get their own profile
+ *   -----------  WARNING ------------------
+ *   THIS METHOD DOESN'T WORK - It appears that a user is unable to get their own profile
+ *   from appid using their own auth token.  Leaving this in for troubleshooting.  The
+ *   method below works but uses the application's token.
  * @param encodedAccessToken - the user's encoded access token
  * @param profileId -- the profile of the user
  * @returns Promise<UserProfile>
