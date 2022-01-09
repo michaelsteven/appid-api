@@ -17,8 +17,6 @@ APPID_SERVICE_ENDPOINT="https://us-south.appid.cloud.ibm.com";
 APPID_API_TENANT_ID="";
 APPID_CLIENT_ID=""
 APPID_SECRET=""
-SUPPORTED_LANGUAGES=en,fr_FR
-FALLBACK_LANGUAGE=en
 ```
 
 Optional:

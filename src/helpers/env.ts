@@ -7,8 +7,6 @@ export const APPID_SERVICE_ENDPOINT = process.env.APPID_SERVICE_ENDPOINT;
 export const APPID_API_TENANT_ID = process.env.APPID_API_TENANT_ID;
 export const APPID_CLIENT_ID = process.env.APPID_CLIENT_ID;
 export const APPID_SECRET = process.env.APPID_SECRET;
-export const FALLBACK_LANGUAGE = process.env.FALLBACK_LANGUAGE;
-export const SUPPORTED_LANGUAGES = process.env.SUPPORTED_LANGUAGES;
 
 export const checkRequiredEnvironmentVariables = () => {
   const requiredEnvironmentVars = [
@@ -17,8 +15,6 @@ export const checkRequiredEnvironmentVariables = () => {
     'APPID_API_TENANT_ID',
     'APPID_CLIENT_ID',
     'APPID_SECRET',
-    'FALLBACK_LANGUAGE',
-    'SUPPORTED_LANGUAGES',
   ];
 
   let missingCount = 0;
