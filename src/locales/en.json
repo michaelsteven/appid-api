@@ -1,8 +1,9 @@
 {
-  "error.undefined": "An undefined error occured",
-  "error.validationfailed": "Validation failed",
-  "api.v1.appid.login.error.400": "Invalid email or password",
-  "api.v1.appid.login.error.401": "Invalid email or password",
+	"error.undefined": "An undefined error occured",
+	"error.validationfailed": "Validation failed",
+	"api.v1.appid.login.error.400": "Invalid email or password",
+	"api.v1.appid.login.error.401": "Invalid email or password",
 	"api.v1.appid.forgotpwd.error.404": "Email not found",
-  "api.v1.appid.signup.error.409": "The email address is already taken"
+	"api.v1.appid.signup.error.409": "The email address is already taken",
+	"api.v1.sample.sayhello.error.401": "Unauthorized"
 }

@@ -4,5 +4,6 @@
   "api.v1.appid.login.error.400": "Email ou mot de passe invalide",
 	"api.v1.appid.login.error.401": "Email ou mot de passe invalide",
 	"api.v1.appid.forgotpwd.error.404": "Email non trouvé",
-  "api.v1.appid.signup.error.409": "L'adresse e-mail est déjà prise"
+  "api.v1.appid.signup.error.409": "L'adresse e-mail est déjà prise",
+  "api.v1.sample.sayhello.error.401": "Non autorisé"
 }
