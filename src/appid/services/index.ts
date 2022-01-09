@@ -1,4 +1,4 @@
 export { signup } from './userSignupService';
 export { getUserProfile } from './userProfileService';
-export { loginWithCredentials, changePassword, forgotPassword, forgotPasswordConfirmationValidationAndChange } from './userLoginService';
+export { loginWithUsernamePassword, loginWithRefreshToken, changePassword, forgotPassword, forgotPasswordConfirmationValidationAndChange } from './userLoginService';
 export { getSupportedLanguages, setSupportedLanguages } from './languageService';

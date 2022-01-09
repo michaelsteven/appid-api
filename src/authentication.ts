@@ -2,6 +2,7 @@ import * as express from 'express';
 import jwtDecode from 'jwt-decode';
 import { AccessToken } from './appid/models/AccessToken';
 import { ApiError } from './helpers/errors';
+import { containsRequiredScopes } from './appid/helpers/token';
 // import { AuthPublicKey } from './helpers/authPublicKey';
 // import { APPID_CLIENT_ID, APPID_API_TENANT_ID } from './helpers/env';
 
@@ -32,20 +33,4 @@ export function expressAuthentication (request: express.Request, securityName: s
     });
   }
   return Promise.reject(new ApiError(401, 'No supported authentication type matched'));
-};
-
-/**
- * ContainsScopes
- * @param accessToken decoded JWT token
- * @param requiredScopesArray scopes required on the endpoint
- * @returns boolean
- */
-const containsRequiredScopes = (accessToken:AccessToken, requiredScopesArray: Array<string>) => {
-  const tokenScopesArray = accessToken.scope.split(' ') as Array<string>;
-  for (const requiredScope of requiredScopesArray) {
-    if (!tokenScopesArray.includes(requiredScope)) {
-      return false;
-    }
-  }
-  return true;
 };

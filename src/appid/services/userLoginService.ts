@@ -1,6 +1,7 @@
 import { Request as ExRequest, } from 'express';
 import {
-  loginWithCredentials as apiLoginWithCredentials,
+  loginWithUsernamePassword as apiLoginWithUsernamePassword,
+  loginWithRefreshToken as apiLoginWithRefreshToken,
   forgotPassword as apiForgotPassword,
   forgotPasswordConfirmationResult,
   changePassword as apiChangePassword,
@@ -17,10 +18,14 @@ import { AccessToken } from '../models/AccessToken';
  * @param exRequest ExRequest
  * @returns []
  */
-export async function loginWithCredentials (username: string, password: string, exRequest: ExRequest): Promise<AccessToken> {
+export async function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AccessToken> {
   const locale = getLocale(exRequest);
-  const response = await apiLoginWithCredentials(username, password, locale);
-  return response;
+  return await apiLoginWithUsernamePassword(username, password, locale);
+};
+
+export async function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AccessToken> {
+  const locale = getLocale(exRequest);
+  return await apiLoginWithRefreshToken(refreshToken, locale, accessToken);
 };
 
 /**

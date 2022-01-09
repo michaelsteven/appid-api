@@ -1,6 +1,6 @@
 import jwtDecode from 'jwt-decode';
 import { Request as ExRequest } from 'express';
-import { AccessToken } from '../appid/models/AccessToken';
+import { AccessToken } from '../models/AccessToken';
 
 export const getEncodedAccessToken = (exRequest: ExRequest): string | undefined => {
   const { authorization } = exRequest.headers;
@@ -36,4 +36,20 @@ export const getSub = (encodedAccessToken: string): string | undefined => {
     }
   }
   return undefined;
+};
+
+/**
+ * Contains Required Scopes
+ * @param accessToken - decoded JWT token
+ * @param requiredScopesArray - scopes required on the endpoint
+ * @returns boolean
+ */
+export const containsRequiredScopes = (accessToken:AccessToken, requiredScopesArray: Array<string>) => {
+  const tokenScopesArray = accessToken.scope.split(' ') as Array<string>;
+  for (const requiredScope of requiredScopesArray) {
+    if (!tokenScopesArray.includes(requiredScope)) {
+      return false;
+    }
+  }
+  return true;
 };

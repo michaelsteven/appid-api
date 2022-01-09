@@ -2,8 +2,18 @@ import { Body, Controller, Get, Post, Put, Request, Response, Route, Security, S
 import { Request as ExRequest, } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { signup, loginWithCredentials, forgotPassword, forgotPasswordConfirmationValidationAndChange, getSupportedLanguages, setSupportedLanguages, getUserProfile, changePassword as svcChangePassword } from '../appid/services';
-import { getEncodedAccessToken } from '../helpers/token';
+import {
+  signup as svcSignup,
+  loginWithUsernamePassword as svcLoginWithUsernamePassword,
+  loginWithRefreshToken as svcLoginWithRefreshToken,
+  forgotPassword,
+  forgotPasswordConfirmationValidationAndChange,
+  getSupportedLanguages,
+  setSupportedLanguages,
+  getUserProfile,
+  changePassword as svcChangePassword,
+} from '../appid/services';
+import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
 import { AccessToken } from '../appid/models/AccessToken';
 import { Languages } from '../appid/models/Languages';
@@ -23,7 +33,7 @@ export class appIdController extends Controller {
   @Post('/signup')
   @SuccessResponse(201, 'Successfully created new user with id')
   @Response<ApiError>(409, 'The email address is already taken')
-  public async createUser (
+  public async signup (
     @Request() exRequest: ExRequest,
     @Body()
       body: {
@@ -35,7 +45,7 @@ export class appIdController extends Controller {
   ): Promise<CloudDirectoryUser> {
     const { firstName, lastName, email, password } = body;
     const locale = getLocale(exRequest);
-    return await signup(firstName, lastName, email, password, locale);
+    return await svcSignup(firstName, lastName, email, password, locale);
   };
 
   /**
@@ -55,7 +65,21 @@ export class appIdController extends Controller {
     }
   ): Promise<AccessToken> {
     const { username, password } = body;
-    return await loginWithCredentials(username, password, exRequest);
+    return await svcLoginWithUsernamePassword(username, password, exRequest);
+  };
+
+  @Post('/login/refresh')
+  @SuccessResponse(200, 'Successful Login')
+  @Response<ApiError>(400, 'Invalid email or password')
+  public async loginWithRefreshToken (
+    @Request() exRequest: ExRequest,
+    @Body() body: {
+      refreshToken: string;
+      accessToken?: string;
+    }
+  ): Promise<AccessToken> {
+    const { refreshToken, accessToken } = body;
+    return await svcLoginWithRefreshToken(refreshToken, exRequest, accessToken);
   };
 
   /**

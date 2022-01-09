@@ -2,7 +2,7 @@ import {
   APPID_SERVICE_ENDPOINT,
   APPID_API_TENANT_ID,
 } from '../../helpers/env';
-import { getSub } from '../../helpers/token';
+import { getSub } from '../helpers/token';
 import { getProfileForUser as apiGetUserProfile } from '../apis/userProfile';
 import { UserProfile } from '../models/UserProfile';
 const userProfileManager = require('ibmcloud-appid').UserProfileManager;
