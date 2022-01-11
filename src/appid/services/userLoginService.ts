@@ -5,11 +5,13 @@ import {
   forgotPassword as apiForgotPassword,
   forgotPasswordConfirmationResult,
   changePassword as apiChangePassword,
+  getPublicKeys as apiGetPublicKeys
 } from '../apis';
 import { getLocale } from '../../helpers/locale';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ApiError } from '../../helpers/errors';
 import { AccessToken } from '../models/AccessToken';
+import { PublicKeys } from '../models/PublicKeys';
 
 /**
  * Login with Credentials
@@ -58,4 +60,8 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
 
 export async function changePassword (payload: {newPassword: string; uuid: string}, locale: string) : Promise<CloudDirectoryUser> {
   return await apiChangePassword(payload, locale);
-}
+};
+
+export const getPublicKeys = async (): Promise<PublicKeys> => {
+  return await apiGetPublicKeys();
+};

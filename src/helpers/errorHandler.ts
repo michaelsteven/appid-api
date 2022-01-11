@@ -1,4 +1,5 @@
 import { Express, Request as ExRequest, Response as ExResponse, NextFunction } from 'express';
+import { JsonWebTokenError } from 'jsonwebtoken';
 import { ValidateError } from 'tsoa';
 import { ApiError } from './errors';
 
@@ -11,6 +12,14 @@ export default (app: Express) => {
           console.warn(`ApiError: ${exRequest.path} ${error.statusCode} ${error.message}`);
           return response.status(error.statusCode).json({
             message: exRequest.__(`${exRequest.path.replace('/', '').replaceAll('/', '.')}.error.${error.statusCode}`),
+          });
+        }
+
+        // JWT error
+        if (error instanceof JsonWebTokenError) {
+          console.warn(`JsonWebTokenError: ${error.message}`);
+          return response.status(401).json({
+            message: exRequest.__('error.401')
           });
         }
 

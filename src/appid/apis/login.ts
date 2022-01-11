@@ -1,6 +1,7 @@
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID, APPID_CLIENT_ID, APPID_SECRET } from '../../helpers/env';
 import { awaitFetch } from '../../helpers/utilities';
 import { AccessToken } from '../models/AccessToken';
+import { PublicKeys } from '../models/PublicKeys';
 
 export const loginWithUsernamePassword = async (username: string, password: string, locale: string): Promise<AccessToken> => {
   const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/token`;
@@ -38,6 +39,17 @@ export const loginWithRefreshToken = async (refreshToken: string, locale: string
       Authorization: `Basic ${base64Creds}`,
       'Accept-Language': locale,
     },
+  };
+  return awaitFetch(url, options);
+};
+
+export const getPublicKeys = async (): Promise<PublicKeys> => {
+  const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/publickeys`;
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    }
   };
   return awaitFetch(url, options);
 };
