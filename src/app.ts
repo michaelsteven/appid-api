@@ -4,6 +4,7 @@ import { I18n } from 'i18n';
 import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
+import cookieParser from 'cookie-parser';
 import errorHandler from './helpers/errorHandler';
 import { checkRequiredEnvironmentVariables, PORT } from './helpers/env';
 import { RegisterRoutes } from '../build/routes';
@@ -29,8 +30,8 @@ app.use(i18n.init);
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use('/docs', swaggerUi.serve, async (_req: ExRequest, res: ExResponse) => {
-  // i18n.init(_req, res);
   return res.send(
     swaggerUi.generateHTML(await import('../build/swagger.json'))
   );

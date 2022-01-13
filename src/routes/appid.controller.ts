@@ -12,12 +12,14 @@ import {
   setSupportedLanguages,
   getUserProfile,
   changePassword as svcChangePassword,
+  redisSet
 } from '../appid/services';
 import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
-import { AccessToken } from '../appid/models/AccessToken';
 import { Languages } from '../appid/models/Languages';
 import { UserProfile } from '../appid/models/UserProfile';
+import { AuthToken } from '../appid/models/AuthToken';
+import crypto from 'crypto';
 
 /**
  * AppId Controller
@@ -63,9 +65,30 @@ export class appIdController extends Controller {
       username: string;
       password: string;
     }
-  ): Promise<AccessToken> {
+  ): Promise<AuthToken> {
     const { username, password } = body;
-    return await svcLoginWithUsernamePassword(username, password, exRequest);
+    // example for jwt authentication - just return the Auth Token
+    // return await svcLoginWithUsernamePassword(username, password, exRequest);
+
+    // example for cookie authentication - set a cookie, stripout the access_token and identity_token and return
+    const responsePayload = await svcLoginWithUsernamePassword(username, password, exRequest);
+    if (responsePayload) {
+      // set the auth token and client ip in redis
+      const uuid = crypto.randomUUID();
+      const clientIp = exRequest.headers['x-forwarded-for'] || exRequest.socket.remoteAddress;
+      const redisAuthData = JSON.stringify({ clientIp: clientIp, authToken: responsePayload });
+      await redisSet(uuid, redisAuthData, 86400); // expire in one day
+
+      // set a cookie in the response header
+      const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
+      this.setHeader('Set-Cookie', `authTicket=${uuid}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
+
+      // return the authToken without the access or refresh token
+      delete responsePayload.access_token;
+      delete responsePayload.refresh_token;
+      return responsePayload;
+    }
+    return { expires_in: 0, id_token: '', scope: '', token_type: '' };
   };
 
   @Post('/login/refresh')
@@ -77,7 +100,7 @@ export class appIdController extends Controller {
       refreshToken: string;
       accessToken?: string;
     }
-  ): Promise<AccessToken> {
+  ): Promise<AuthToken> {
     const { refreshToken, accessToken } = body;
     return await svcLoginWithRefreshToken(refreshToken, exRequest, accessToken);
   };

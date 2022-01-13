@@ -16,10 +16,10 @@
     "outputDirectory": "./build/",
     "entryFile": "./src/app.ts",
     "securityDefinitions": {
-        "jwt": {
-            "name": "jwt",
-            "type": "jwt"
-        }
+        "cookie": {
+          "name": "cookie",
+          "type": "cookie"
+      }
     }
   }
 }

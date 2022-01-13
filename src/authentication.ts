@@ -1,44 +1,47 @@
 import * as express from 'express';
-import jwt from 'jsonwebtoken';
-import { AccessToken } from './appid/models/AccessToken';
 import { ApiError } from './helpers/errors';
-import { containsRequiredScopes } from './appid/helpers/token';
 import { AuthPublicKey } from './appid/helpers/AuthPublicKey';
-import { APPID_CLIENT_ID, APPID_API_TENANT_ID } from './helpers/env';
+import { RedisAuthData } from './appid/models/RedisAuthData';
+import { redisGet } from './appid/services';
+import { validateToken, validateTokenOrRefresh } from './appid/services/tokenService';
 
 export async function expressAuthentication (request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
+  const authPublicKey = AuthPublicKey.getInstance();
+  const publicKey = await authPublicKey.getPublicKey();
+
+  // JWT Auth -- client renews access token using refresh token
   if (securityName === 'jwt') {
     const { authorization } = request.headers;
-    const authPublicKey = AuthPublicKey.getInstance();
-    const publicKey = await authPublicKey.getPublicKey();
+    if (authorization && authorization.startsWith('Bearer')) {
+      const accessToken = authorization.replace(/Bearer (.*)$/, '$1');
+      return validateToken(accessToken, publicKey, scopes);
+    } else {
+      return Promise.reject(new ApiError(401, 'Unauthorized. No authorization header of type Bearer present'));
+    }
 
-    return new Promise((resolve, reject) => {
-      if (!authorization || !authorization.startsWith('Bearer')) {
-        return reject(new ApiError(401, 'Unauthorized. No authorization header of type Bearer present'));
-      } else {
-        // verify the token signature using the public key
-        const token = authorization.replace(/Bearer (.*)$/, '$1');
-        const decodedToken = jwt.verify(token, publicKey) as AccessToken;
-
-        // verify our tenant matches the token tenant
-        const { tenant, aud } = decodedToken;
-        if (APPID_API_TENANT_ID !== tenant) {
-          return reject(new ApiError(401, 'Invalid Tenant ID'));
-        }
-
-        // Verify token client id against aud: Array<string>
-        if (!aud || !aud.includes(APPID_CLIENT_ID || '')) {
-          return reject(new ApiError(401, 'Invalid Client ID'));
-        }
-
-        // verify token contains required scopes
-        if (!containsRequiredScopes(decodedToken, scopes || [])) {
-          return reject(new ApiError(401, 'Insufficient Permissions'));
-        } else {
-          return resolve(token);
-        }
+  // Cookie Auth -- server renews access token using refresh token
+  } else if (securityName === 'cookie') {
+    if (request.cookies && request.cookies.authTicket) {
+      // get the access token and login ip from the redis data
+      const redisData = await redisGet(request.cookies.authTicket);
+      if (!redisData) {
+        return Promise.reject(new ApiError(401, 'Unauthorized. Session not found'));
       }
-    });
+      const { authToken, clientIp: loginClientIp } = JSON.parse(redisData || '') as RedisAuthData;
+
+      // verify the IP of the request matches the IP used to log in.
+      const clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
+      if (clientIp !== loginClientIp) {
+        return Promise.reject(new ApiError(401, 'Unauthorized. Ip Changed'));
+      }
+
+      // validate the access token or get a new token using the refresh token if expired
+      return await validateTokenOrRefresh(authToken, publicKey, request, scopes);
+    } else {
+      return Promise.reject(new ApiError(401, 'Unauthorized. No auth cookie present'));
+    }
   }
+
+  // No Auth matched
   return Promise.reject(new ApiError(401, 'No supported authentication type matched'));
 };

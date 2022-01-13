@@ -6,7 +6,7 @@ export class sampleController extends Controller {
    * @returns any
    */
   @Get('/sayhello')
-  @Security('jwt', ['foo'])
+  @Security('cookie', ['foo'])
   @SuccessResponse(200, 'Says Hello')
   public sayHello (
   ): Promise<any> {

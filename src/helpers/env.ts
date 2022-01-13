@@ -7,6 +7,7 @@ export const APPID_SERVICE_ENDPOINT = process.env.APPID_SERVICE_ENDPOINT;
 export const APPID_API_TENANT_ID = process.env.APPID_API_TENANT_ID;
 export const APPID_CLIENT_ID = process.env.APPID_CLIENT_ID;
 export const APPID_SECRET = process.env.APPID_SECRET;
+export const REDIS_URL = process.env.REDIS_URL;
 
 export const checkRequiredEnvironmentVariables = () => {
   const requiredEnvironmentVars = [
@@ -15,6 +16,7 @@ export const checkRequiredEnvironmentVariables = () => {
     'APPID_API_TENANT_ID',
     'APPID_CLIENT_ID',
     'APPID_SECRET',
+    'REDIS_URL',
   ];
 
   let missingCount = 0;

@@ -10,8 +10,8 @@ import {
 import { getLocale } from '../../helpers/locale';
 import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ApiError } from '../../helpers/errors';
-import { AccessToken } from '../models/AccessToken';
 import { PublicKeys } from '../models/PublicKeys';
+import { AuthToken } from '../models/AuthToken';
 
 /**
  * Login with Credentials
@@ -20,12 +20,12 @@ import { PublicKeys } from '../models/PublicKeys';
  * @param exRequest ExRequest
  * @returns []
  */
-export async function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AccessToken> {
+export async function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AuthToken> {
   const locale = getLocale(exRequest);
   return await apiLoginWithUsernamePassword(username, password, locale);
 };
 
-export async function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AccessToken> {
+export async function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AuthToken> {
   const locale = getLocale(exRequest);
   return await apiLoginWithRefreshToken(refreshToken, locale, accessToken);
 };
