@@ -13,7 +13,7 @@ import {
   getUserProfile,
   changePassword as svcChangePassword,
   redisSet,
-  loginWithRedisRefreshToken
+  renewAuthWithRefreshToken
 } from '../appid/services';
 import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
@@ -87,10 +87,10 @@ export class appIdController extends Controller {
 
       // return the AuthInfo object
       const { id_token: encodedIdToken, scope } = responsePayload;
-      const idToken = jwt.decode(encodedIdToken) as IdentityToken;
-      return { idToken: idToken, scope: scope };
+      const { exp, name, given_name: givenName, family_name: familyName } = jwt.decode(encodedIdToken) as IdentityToken;
+      return { exp: exp, name: name, givenName: givenName, familyName: familyName, scope: scope };
     }
-    return {};
+    return Promise.reject(new ApiError(401, 'login provided an empty response'));
   };
 
   @Post('/login/refresh')
@@ -109,7 +109,7 @@ export class appIdController extends Controller {
 
     // cookie implementation
     const newUuid = crypto.randomUUID();
-    const authInfo = await loginWithRedisRefreshToken(newUuid, exRequest);
+    const authInfo = await renewAuthWithRefreshToken(newUuid, exRequest);
     if (authInfo) {
       // set a cookie in the response header
       const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';

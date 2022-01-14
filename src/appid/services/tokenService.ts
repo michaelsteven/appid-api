@@ -1,13 +1,14 @@
 import { Request as ExRequest, } from 'express';
 import jwt from 'jsonwebtoken';
 import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
-import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, } from '../services';
+import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, redisGet, } from '../services';
 import { ApiError } from '../../helpers/errors';
 import { containsRequiredScopes } from '../helpers/token';
 import { AccessToken } from '../models/AccessToken';
 import { AuthToken } from '../models/AuthToken';
 import { AuthInfo } from '../models/AuthInfo';
 import { IdentityToken } from '../models/IdentityToken';
+import { RedisAuthData } from '../models/RedisAuthData';
 
 /**
  * Validate Token
@@ -41,13 +42,30 @@ export const validateToken = (accessToken: string, publicKey: string, scopes?: A
   });
 };
 
-export const getRefreshToken = async (newUuid: string, authToken: AuthToken, request: ExRequest):Promise<AuthInfo> => {
+export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequest):Promise<AuthInfo> => {
+  // make sure the auth ticket is present
+  if (request.cookies && request.cookies.authTicket) {
+    return Promise.reject(new ApiError(401, 'Unauthorized. AuthTicket Cookie not found'));
+  }
+
+  // get the access token and login ip from the redis data
+  const redisData = await redisGet(request.cookies.authTicket);
+  if (!redisData) {
+    return Promise.reject(new ApiError(401, 'Unauthorized. Session not found'));
+  }
+  const { authToken, clientIp: loginClientIp } = JSON.parse(redisData || '') as RedisAuthData;
+
+  // verify the IP of the request matches the IP used to log in.
+  const clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
+  if (clientIp !== loginClientIp) {
+    return Promise.reject(new ApiError(401, 'Unauthorized. Ip Changed'));
+  }
+
   // use the refresh token to get new AuthToken
   const { refresh_token: refreshToken, access_token: accessToken } = authToken as AuthToken;
   const newAuthToken = await svcLoginWithRefreshToken(refreshToken || '', request, accessToken);
 
   // add redis data and clear out old data
-  const clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
   const redisAuthData = JSON.stringify({ clientIp: clientIp, authToken: newAuthToken });
   await redisSet(newUuid, redisAuthData, 86400); // expire in one day
   await redisRemove(request.cookies.authTicket);
@@ -56,6 +74,6 @@ export const getRefreshToken = async (newUuid: string, authToken: AuthToken, req
 
   // return the AuthInfo object
   const { id_token: encodedIdToken, scope } = newAuthToken;
-  const idToken = jwt.decode(encodedIdToken) as IdentityToken;
-  return { idToken: idToken, scope: scope };
+  const { exp, name, given_name: givenName, family_name: familyName } = jwt.decode(encodedIdToken) as IdentityToken;
+  return { exp: exp, name: name, givenName: givenName, familyName: familyName, scope: scope };
 };

@@ -1,6 +1,8 @@
-import { IdentityToken } from './IdentityToken';
-
+/* eslint-disable camelcase */
 export interface AuthInfo {
-  idToken?: IdentityToken;
   scope?: string;
+  exp: number;
+  name: string;
+  givenName: string;
+  familyName: string;
 }

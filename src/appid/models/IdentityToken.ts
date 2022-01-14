@@ -5,18 +5,18 @@ interface Identity {
 }
 
 export interface IdentityToken {
-  iss: string;
-  aud: Array<string>;
+  iss?: string;
+  aud?: Array<string>;
   exp: number;
-  tenant: string;
+  tenant?: string;
   iat: number;
   email: string;
   name: string;
-  sub: string;
+  sub?: string;
   email_verified: boolean;
   preferred_username: string;
   given_name: string;
   family_name: string;
-  identities: Array<Identity>;
-  amr: Array<string>;
+  identities?: Array<Identity>;
+  amr?: Array<string>;
 }
