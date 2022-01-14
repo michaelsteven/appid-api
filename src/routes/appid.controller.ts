@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
+import { Body, Controller, Delete, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
 import { Request as ExRequest } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
@@ -13,7 +13,8 @@ import {
   getUserProfile,
   changePassword as svcChangePassword,
   redisSet,
-  renewAuthWithRefreshToken
+  renewAuthWithRefreshToken,
+  redisRemove
 } from '../appid/services';
 import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
@@ -69,10 +70,6 @@ export class appIdController extends Controller {
     }
   ): Promise<AuthInfo> {
     const { username, password } = body;
-    // example for jwt authentication - just return the Auth Token
-    // return await svcLoginWithUsernamePassword(username, password, exRequest);
-
-    // example for cookie authentication - set a cookie, stripout the access_token and identity_token and return
     const responsePayload = await svcLoginWithUsernamePassword(username, password, exRequest);
     if (responsePayload) {
       // set the auth token and client ip in redis
@@ -98,20 +95,10 @@ export class appIdController extends Controller {
   @Response<ApiError>(400, 'Invalid email or password')
   public async loginWithRefreshToken (
     @Request() exRequest: ExRequest,
-    // @Body() body: {
-      // refreshToken: string;
-      // accessToken?: string;
-    // }
   ): Promise<AuthInfo> {
-    // jwt implementation
-    // const { refreshToken, accessToken } = body;
-    // return await svcLoginWithRefreshToken(refreshToken, exRequest, accessToken);
-
-    // cookie implementation
     const newUuid = crypto.randomUUID();
     const authInfo = await renewAuthWithRefreshToken(newUuid, exRequest);
-    if (authInfo) {
-      // set a cookie in the response header
+    if (authInfo) { // set a cookie in the response header
       const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
       this.setHeader('Set-Cookie', `authTicket=${newUuid}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
     }
@@ -173,7 +160,7 @@ export class appIdController extends Controller {
    * @returns Promise<CloudDirectoryUser>
    */
   @Post('/changepwd')
-  @Security('jwt', ['appid_authenticated'])
+  @Security('cookie', ['appid_authenticated'])
   @SuccessResponse(200, 'Successful Login')
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
@@ -193,7 +180,6 @@ export class appIdController extends Controller {
 
     // build the payload and change the password
     const { newPassword } = body;
-    // const clientIp = exRequest.socket.remoteAddress;
     const payload = { newPassword: newPassword, uuid: uuid };
     const locale = getLocale(exRequest);
     return await svcChangePassword(payload, locale);
@@ -207,7 +193,7 @@ export class appIdController extends Controller {
    * @returns Promise<CloudDirectoryUser>
    */
   @Post('/changepwdforuser')
-  @Security('jwt', ['appid_authenticated', 'administrator'])
+  @Security('cookie', ['appid_authenticated', 'administrator'])
   @SuccessResponse(200, 'Successful Login')
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
@@ -231,7 +217,7 @@ export class appIdController extends Controller {
    * @returns Promise<UserProfile>
    */
   @Get('/profile')
-  @Security('jwt', ['appid_authenticated'])
+  @Security('cookie', ['appid_authenticated'])
   @SuccessResponse(200, 'Gets Profile')
   public getProfile (
     @Request() exRequest: ExRequest
@@ -273,4 +259,21 @@ export class appIdController extends Controller {
     const locale = getLocale(exRequest);
     return await setSupportedLanguages(body, locale);
   }
+
+  @Delete('/logout')
+  @SuccessResponse(204, 'No Content')
+  public async logout (
+    @Request() exRequest: ExRequest
+  ): Promise<void> {
+    if (exRequest.cookies && exRequest.cookies.authTicket) {
+      // remove the redis record
+      await redisRemove(exRequest.cookies.authTicket);
+
+      // remove the cookie
+      const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
+      this.setHeader('Set-Cookie', `authTicket=deleted; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions} expires=Thu, 01 Jan 1970 00:00:00 GMT`);
+
+      // TODO: invalidate the token on the auth server
+    }
+  };
 };

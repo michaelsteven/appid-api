@@ -5,7 +5,19 @@
   "spec": {
     "outputDirectory": "./build/",
     "specVersion": 3,
-    "basePath": "/api/v1"
+    "basePath": "/api/v1",
+    "securityDefinitions": {
+      "jwt": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "cookie": {
+        "type": "apiKey",
+        "name": "Cookie",
+        "in": "header"
+      }
+    }
   },
   "routes": {
     "routesDir": "./build/",
@@ -13,13 +25,6 @@
     "authenticationModule": "./src/authentication.ts"
   },
   "swagger":{
-    "outputDirectory": "./build/",
-    "entryFile": "./src/app.ts",
-    "securityDefinitions": {
-        "cookie": {
-          "name": "cookie",
-          "type": "cookie"
-      }
-    }
+    "entryFile": "./src/app.ts"
   }
 }
