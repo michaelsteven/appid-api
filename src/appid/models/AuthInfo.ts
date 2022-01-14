@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 export interface AuthInfo {
-  scope?: string;
+  scope: string;
   exp: number;
   name: string;
   givenName: string;
