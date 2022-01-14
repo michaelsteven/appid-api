@@ -1,44 +1,22 @@
-import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Request as ExRequest, } from 'express';
-import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID, APPID_CLIENT_ID, APPID_SECRET } from '../../helpers/env';
-import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, } from '../services';
+import jwt from 'jsonwebtoken';
+import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
+import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, } from '../services';
 import { ApiError } from '../../helpers/errors';
 import { containsRequiredScopes } from '../helpers/token';
 import { AccessToken } from '../models/AccessToken';
 import { AuthToken } from '../models/AuthToken';
+import { AuthInfo } from '../models/AuthInfo';
+import { IdentityToken } from '../models/IdentityToken';
 
 /**
- * Gets the app identity token
+ * Validate Token
+ * @param accessToken - the access token
+ * @param publicKey - the public key from the auth server
+ * @param scopes - array of scopes
+ * @returns Promise<void>
  */
-export const getAppIdentityToken = () => {
-  const config = {
-    tenantId: APPID_API_TENANT_ID,
-    clientId: APPID_CLIENT_ID,
-    secret: APPID_SECRET,
-    oauthServerUrl: `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}`,
-  };
-  const TokenManager = require('ibmcloud-appid').TokenManager;
-  const tokenManager = new TokenManager(config);
-  try {
-    return tokenManager.getApplicationIdentityToken();
-  } catch (err) {
-    console.log('err obtained : ' + err);
-  }
-};
-
-export const validateTokenOrRefresh = async (authToken: AuthToken, publicKey: string, request: ExRequest, scopes?: Array<string>) : Promise<any> => {
-  const { access_token: accessToken } = authToken as AuthToken;
-  try {
-    return validateToken(accessToken || '', publicKey, scopes);
-  } catch (error) {
-    if (error instanceof TokenExpiredError) {
-      return getRefreshToken(authToken, request);
-    }
-    return Promise.reject(error);
-  }
-};
-
-export const validateToken = (accessToken: string, publicKey: string, scopes?: Array<string>) : Promise<any> => {
+export const validateToken = (accessToken: string, publicKey: string, scopes?: Array<string>) : Promise<void> => {
   return new Promise((resolve, reject) => {
     // verify the token signature using the public key
     const decodedToken = jwt.verify(accessToken, publicKey) as AccessToken;
@@ -58,17 +36,26 @@ export const validateToken = (accessToken: string, publicKey: string, scopes?: A
     if (!containsRequiredScopes(decodedToken, scopes || [])) {
       return reject(new ApiError(401, 'Insufficient Permissions'));
     } else {
-      return resolve(accessToken);
+      return resolve();
     }
   });
 };
 
-const getRefreshToken = async (authToken: AuthToken, request: ExRequest):Promise<any> => {
+export const getRefreshToken = async (newUuid: string, authToken: AuthToken, request: ExRequest):Promise<AuthInfo> => {
+  // use the refresh token to get new AuthToken
   const { refresh_token: refreshToken, access_token: accessToken } = authToken as AuthToken;
   const newAuthToken = await svcLoginWithRefreshToken(refreshToken || '', request, accessToken);
-  const { access_token: newAccessToken } = newAuthToken as AuthToken;
+
+  // add redis data and clear out old data
   const clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
-  const redisAuthData = JSON.stringify({ clientIp: clientIp, authToken: newAccessToken });
-  await redisSet(request.cookies.authTicket, redisAuthData, 86400); // expire in one day
-  return Promise.resolve(newAccessToken || '');
+  const redisAuthData = JSON.stringify({ clientIp: clientIp, authToken: newAuthToken });
+  await redisSet(newUuid, redisAuthData, 86400); // expire in one day
+  await redisRemove(request.cookies.authTicket);
+
+  // TODO: make call to the auth server to invalidate the old refresh token
+
+  // return the AuthInfo object
+  const { id_token: encodedIdToken, scope } = newAuthToken;
+  const idToken = jwt.decode(encodedIdToken) as IdentityToken;
+  return { idToken: idToken, scope: scope };
 };

@@ -14,3 +14,7 @@ export const set = async (key: string, value: string, timeout: number): Promise<
 export const get = async (key: string): Promise<string|null> => {
   return await client.get(key);
 };
+
+export const remove = async (key: string): Promise<void> => {
+  await client.del(key);
+};

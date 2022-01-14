@@ -1,25 +1,27 @@
 import { Body, Controller, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
-import { Request as ExRequest, } from 'express';
+import { Request as ExRequest } from 'express';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
+import jwt from 'jsonwebtoken';
 import {
   signup as svcSignup,
   loginWithUsernamePassword as svcLoginWithUsernamePassword,
-  loginWithRefreshToken as svcLoginWithRefreshToken,
   forgotPassword,
   forgotPasswordConfirmationValidationAndChange,
   getSupportedLanguages,
   setSupportedLanguages,
   getUserProfile,
   changePassword as svcChangePassword,
-  redisSet
+  redisSet,
+  loginWithRedisRefreshToken
 } from '../appid/services';
 import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
 import { Languages } from '../appid/models/Languages';
 import { UserProfile } from '../appid/models/UserProfile';
-import { AuthToken } from '../appid/models/AuthToken';
+import { AuthInfo } from '../appid/models/AuthInfo';
 import crypto from 'crypto';
+import { IdentityToken } from '../appid/models/IdentityToken';
 
 /**
  * AppId Controller
@@ -65,7 +67,7 @@ export class appIdController extends Controller {
       username: string;
       password: string;
     }
-  ): Promise<AuthToken> {
+  ): Promise<AuthInfo> {
     const { username, password } = body;
     // example for jwt authentication - just return the Auth Token
     // return await svcLoginWithUsernamePassword(username, password, exRequest);
@@ -83,12 +85,12 @@ export class appIdController extends Controller {
       const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
       this.setHeader('Set-Cookie', `authTicket=${uuid}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
 
-      // return the authToken without the access or refresh token
-      delete responsePayload.access_token;
-      delete responsePayload.refresh_token;
-      return responsePayload;
+      // return the AuthInfo object
+      const { id_token: encodedIdToken, scope } = responsePayload;
+      const idToken = jwt.decode(encodedIdToken) as IdentityToken;
+      return { idToken: idToken, scope: scope };
     }
-    return { expires_in: 0, id_token: '', scope: '', token_type: '' };
+    return {};
   };
 
   @Post('/login/refresh')
@@ -96,13 +98,24 @@ export class appIdController extends Controller {
   @Response<ApiError>(400, 'Invalid email or password')
   public async loginWithRefreshToken (
     @Request() exRequest: ExRequest,
-    @Body() body: {
-      refreshToken: string;
-      accessToken?: string;
+    // @Body() body: {
+      // refreshToken: string;
+      // accessToken?: string;
+    // }
+  ): Promise<AuthInfo> {
+    // jwt implementation
+    // const { refreshToken, accessToken } = body;
+    // return await svcLoginWithRefreshToken(refreshToken, exRequest, accessToken);
+
+    // cookie implementation
+    const newUuid = crypto.randomUUID();
+    const authInfo = await loginWithRedisRefreshToken(newUuid, exRequest);
+    if (authInfo) {
+      // set a cookie in the response header
+      const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
+      this.setHeader('Set-Cookie', `authTicket=${newUuid}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
     }
-  ): Promise<AuthToken> {
-    const { refreshToken, accessToken } = body;
-    return await svcLoginWithRefreshToken(refreshToken, exRequest, accessToken);
+    return authInfo;
   };
 
   /**

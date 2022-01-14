@@ -3,7 +3,7 @@ import { ApiError } from './helpers/errors';
 import { AuthPublicKey } from './appid/helpers/AuthPublicKey';
 import { RedisAuthData } from './appid/models/RedisAuthData';
 import { redisGet } from './appid/services';
-import { validateToken, validateTokenOrRefresh } from './appid/services/tokenService';
+import { validateToken } from './appid/services/tokenService';
 
 export async function expressAuthentication (request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
   const authPublicKey = AuthPublicKey.getInstance();
@@ -36,7 +36,8 @@ export async function expressAuthentication (request: express.Request, securityN
       }
 
       // validate the access token or get a new token using the refresh token if expired
-      return await validateTokenOrRefresh(authToken, publicKey, request, scopes);
+      const { access_token: accessToken } = authToken;
+      return await validateToken(accessToken || '', publicKey, scopes);
     } else {
       return Promise.reject(new ApiError(401, 'Unauthorized. No auth cookie present'));
     }
