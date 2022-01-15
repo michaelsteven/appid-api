@@ -14,7 +14,8 @@ import {
   changePassword as svcChangePassword,
   redisSet,
   renewAuthWithRefreshToken,
-  redisRemove
+  revokeRefreshToken as svcRevokeRefreshToken,
+  redisRemove,
 } from '../appid/services';
 import { getEncodedAccessToken } from '../appid/helpers/token';
 import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
@@ -266,14 +267,15 @@ export class appIdController extends Controller {
     @Request() exRequest: ExRequest
   ): Promise<void> {
     if (exRequest.cookies && exRequest.cookies.authTicket) {
-      // remove the redis record
+      // revoke the refresh token
+      await svcRevokeRefreshToken(exRequest);
+
+      // remove the redis data
       await redisRemove(exRequest.cookies.authTicket);
 
       // remove the cookie
       const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
       this.setHeader('Set-Cookie', `authTicket=deleted; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions} expires=Thu, 01 Jan 1970 00:00:00 GMT`);
-
-      // TODO: invalidate the token on the auth server
     }
   };
 };

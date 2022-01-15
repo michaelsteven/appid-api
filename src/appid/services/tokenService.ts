@@ -1,5 +1,6 @@
 import { Request as ExRequest, } from 'express';
 import jwt from 'jsonwebtoken';
+import { revokeRefreshToken as apiRevokeRefreshToken } from '../apis';
 import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
 import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, redisGet, } from '../services';
 import { ApiError } from '../../helpers/errors';
@@ -9,6 +10,7 @@ import { AuthToken } from '../models/AuthToken';
 import { AuthInfo } from '../models/AuthInfo';
 import { IdentityToken } from '../models/IdentityToken';
 import { RedisAuthData } from '../models/RedisAuthData';
+import { getLocale } from 'i18n';
 
 /**
  * Validate Token
@@ -76,4 +78,32 @@ export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequ
   const { id_token: encodedIdToken, scope } = newAuthToken;
   const { exp, name, given_name: givenName, family_name: familyName } = jwt.decode(encodedIdToken) as IdentityToken;
   return { exp: exp, name: name, givenName: givenName, familyName: familyName, scope: scope };
+};
+
+/**
+ * Revoke Refresh Token
+ * @param refreshToken - the refresh token to revoke
+ * @param exRequest -- the express header
+ * @returns Promise<String>
+ */
+export async function revokeRefreshToken (exRequest: ExRequest): Promise<String> {
+  const locale = getLocale(exRequest);
+
+  // if we can get the auth ticket from the header
+  if (exRequest.cookies && exRequest.cookies.authTicket) {
+    // get the refresh token from the redis data
+    const redisData = await redisGet(exRequest.cookies.authTicket);
+    if (redisData) {
+      const { authToken } = JSON.parse(redisData || '') as RedisAuthData;
+      const { refresh_token: refreshToken } = authToken;
+
+      // call the api to revoke the refresh token
+      if (refreshToken) {
+        return await apiRevokeRefreshToken(refreshToken, locale);
+      }
+    } else {
+      return 'no redis data';
+    }
+  }
+  return 'refresh token not revoked';
 };

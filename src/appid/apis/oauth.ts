@@ -43,6 +43,25 @@ export const loginWithRefreshToken = async (refreshToken: string, locale: string
   return awaitFetch(url, options);
 };
 
+export const revokeRefreshToken = async (refreshToken: string, locale: string): Promise<String> => {
+  const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/revoke`;
+  const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
+  const options = {
+    method: 'POST',
+    body: JSON.stringify({
+      grant_type: 'refresh_token',
+      token: refreshToken,
+    }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${base64Creds}`,
+      'Accept-Language': locale,
+    },
+  };
+  return awaitFetch(url, options);
+};
+
 export const getPublicKeys = async (): Promise<PublicKeys> => {
   const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/publickeys`;
   const options = {

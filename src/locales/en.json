@@ -6,5 +6,6 @@
 	"api.v1.appid.login.error.401": "Invalid email or password",
 	"api.v1.appid.forgotpwd.error.404": "Email not found",
 	"api.v1.appid.signup.error.409": "The email address is already taken",
-	"api.v1.sample.sayhello.error.401": "Unauthorized"
+	"api.v1.sample.sayhello.error.401": "Unauthorized",
+	"api.v1.appid.login.refresh.error.401": "api.v1.appid.login.refresh.error.401"
 }

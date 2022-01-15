@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 export interface AuthInfo {
   scope: string;
   exp: number;

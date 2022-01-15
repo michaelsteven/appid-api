@@ -30,3 +30,9 @@ export class AuthPublicKey {
     return AuthPublicKey.publicKey;
   }
 };
+
+export const getPublicKey = async ():Promise<string> => {
+  const publicKeys = await svcGetPublicKeys();
+  const jwk = publicKeys.keys[0];
+  return jwktopem(jwk);
+};
