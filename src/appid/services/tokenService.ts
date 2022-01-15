@@ -5,12 +5,7 @@ import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
 import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, redisGet, } from '../services';
 import { ApiError } from '../../helpers/errors';
 import { containsRequiredScopes } from '../helpers/token';
-import { AccessToken } from '../models/AccessToken';
-import { AuthToken } from '../models/AuthToken';
-import { AuthInfo } from '../models/AuthInfo';
-import { IdentityToken } from '../models/IdentityToken';
-import { RedisAuthData } from '../models/RedisAuthData';
-import { getLocale } from 'i18n';
+import { AccessToken, AuthToken, AuthInfo, IdentityToken, RedisAuthData } from '../models';
 
 /**
  * Validate Token
@@ -72,7 +67,14 @@ export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequ
   await redisSet(newUuid, redisAuthData, 86400); // expire in one day
   await redisRemove(request.cookies.authTicket);
 
-  // TODO: make call to the auth server to invalidate the old refresh token
+  // revoke the original refresh token
+  if (refreshToken) {
+    try {
+      await apiRevokeRefreshToken(refreshToken);
+    } catch (error) {
+      console.log('failed to revoke refresh token', error);
+    }
+  }
 
   // return the AuthInfo object
   const { id_token: encodedIdToken, scope } = newAuthToken;
@@ -87,8 +89,6 @@ export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequ
  * @returns Promise<String>
  */
 export async function revokeRefreshToken (exRequest: ExRequest): Promise<String> {
-  const locale = getLocale(exRequest);
-
   // if we can get the auth ticket from the header
   if (exRequest.cookies && exRequest.cookies.authTicket) {
     // get the refresh token from the redis data
@@ -99,7 +99,7 @@ export async function revokeRefreshToken (exRequest: ExRequest): Promise<String>
 
       // call the api to revoke the refresh token
       if (refreshToken) {
-        return await apiRevokeRefreshToken(refreshToken, locale);
+        return await apiRevokeRefreshToken(refreshToken);
       }
     } else {
       return 'no redis data';

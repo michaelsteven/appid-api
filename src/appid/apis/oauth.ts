@@ -1,4 +1,6 @@
+import fetch from 'cross-fetch';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID, APPID_CLIENT_ID, APPID_SECRET } from '../../helpers/env';
+import { ApiError } from '../../helpers/errors';
 import { awaitFetch } from '../../helpers/utilities';
 import { AuthToken } from '../models/AuthToken';
 import { PublicKeys } from '../models/PublicKeys';
@@ -43,23 +45,26 @@ export const loginWithRefreshToken = async (refreshToken: string, locale: string
   return awaitFetch(url, options);
 };
 
-export const revokeRefreshToken = async (refreshToken: string, locale: string): Promise<String> => {
+export const revokeRefreshToken = async (refreshToken: string): Promise<String> => {
   const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/revoke`;
   const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
+  const formData = new URLSearchParams();
+  formData.append('token', refreshToken);
+  formData.append('token_type_hint', 'refresh_token');
   const options = {
     method: 'POST',
-    body: JSON.stringify({
-      grant_type: 'refresh_token',
-      token: refreshToken,
-    }),
+    body: formData.toString(),
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${base64Creds}`,
-      'Accept-Language': locale,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${base64Creds}`
     },
   };
-  return awaitFetch(url, options);
+  const response = await fetch(url, options).then((result) => result);
+  if (response.ok) {
+    return response.statusText;
+  }
+  throw new ApiError(response.status, response.statusText);
 };
 
 export const getPublicKeys = async (): Promise<PublicKeys> => {

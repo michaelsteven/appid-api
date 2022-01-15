@@ -7,11 +7,9 @@ import {
   changePassword as apiChangePassword,
   getPublicKeys as apiGetPublicKeys
 } from '../apis';
+import { CloudDirectoryUser, PublicKeys, AuthToken } from '../models';
 import { getLocale } from '../../helpers/locale';
-import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
 import { ApiError } from '../../helpers/errors';
-import { PublicKeys } from '../models/PublicKeys';
-import { AuthToken } from '../models/AuthToken';
 
 /**
  * Login with Credentials

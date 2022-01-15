@@ -3,11 +3,13 @@ Stubbed out NodeJS REST API for interacting with the AppID Service. This is a wo
 
 ## Design Decisions
 
-***Cookie Authetication***:  Two different ways of handling the tokens are possible with this project. They involve returing a JWT or setting an HttpOnly Cookie and storing the JWT in a database. The HttpOnly cookie means it can't be read by javascript. The currently coded in mechanism is cookie authentication, however there is code in place for JWT based authentication should that fit your requirements.
+***Cookie Authetication***:  Two different ways of handling the tokens are possible with this project. They involve returing a JWT or setting an HttpOnly Cookie and storing the JWT in a database. The HttpOnly cookie means it can't be read by javascript. The currently coded in mechanism is cookie authentication, however there is code in place for easily switching to JWT based authentication should that fit your requirements.
 
-As part of the Cookie Authentication flow, upon successful login a guid is generated and set into an HttpOnly cookie as an authTicket.  The login method also returns an identity token and other metadata for use in the client to use since the HttpOnly cookie cannot be read by javascript.  The JWT token obtained at login time and the client's IP adddress is stored in a Redis database.  
+As part of the Cookie Authentication flow, upon successful login a guid is generated and set into an HttpOnly cookie as an authTicket. The HttpOnly cookie means that it is not accessable via javascript.  The login method also returns basic auth info metadata for use in the client to use since the HttpOnly cookie cannot be read by javascript.  The JWT token obtained at login time and the client's IP adddress are stored in a Redis database.  The tokens are only used internally on the server, and expired from Redis after one day (when the refresh would expire). The access and refresh tokens are never shared with the client.
 
-When an API request requring authorization is received, the cookie is read on the server to retrieve the authTicket.  The authTicket's guid is used to look up the JWT, the client's IP address compared, and it's access token verified. If the access token from Redis is expired, the refresh token will be used to generate a new access token.  The access and refresh tokens are never shared with the client, and only used internally on the server, and expired from Redis after one day.
+When an API request requring authorization is received, the cookie is read by the server to retrieve the authTicket.  The authTicket's guid is used to look up the JWT, the client's IP address compared, and it's access token verified. If the access token from Redis is expired, the refresh token will be used to generate a new access token and refresh_token, and then the original refresh token is revoked.  
+
+On logout, the refresh_token is revoked, redis data is removed, and the authTicket cookie deleted.
 
 ***TSOA***: The TSOA module is used to read the annotations on the controllers at build time, and construct the swagger json.  This works in conjunction with Express. The disadvantage is that it is more difficult to use middleware like passport to authenticate the express request.  TSOA has a pattern of using a @Security annotation to handle authorization on the request so it's not a big loss.
 

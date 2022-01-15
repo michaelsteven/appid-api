@@ -1,15 +1,7 @@
 import { ApiError } from '../../helpers/errors';
 import { SignupUser } from '../models/SignupUser';
 import { cloudDirectoryProfileRemove, signup as apiSignup } from '../apis';
-import { getAppIdentityToken } from './tokenService';
-import { IBMCLOUD_API_KEY, APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
-import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
-
-const SelfServiceManager = require('ibmcloud-appid').SelfServiceManager;
-const selfServiceManager = new SelfServiceManager({
-  iamApiKey: IBMCLOUD_API_KEY,
-  managementUrl: `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}`,
-});
+import { CloudDirectoryUser } from '../models';
 
 /**
  * Signup
@@ -22,8 +14,6 @@ const selfServiceManager = new SelfServiceManager({
  */
 export async function signup (firstName : string, lastName : string, email: string, password : string, locale : string): Promise<CloudDirectoryUser> {
   const user = buildSignupUser(firstName, lastName, email, password);
-
-  // const appIdUser = await selfServiceSignup(user, locale);
   const appIdUser = await apiSignup(user, locale);
   const { id: cloudDirectoyId } = appIdUser;
   try {
@@ -53,17 +43,6 @@ export async function signup (firstName : string, lastName : string, email: stri
     }
     throw error;
   }
-};
-
-/**
- * Signup via the SelfServiceManager in the appid node sdk
- * @param user User
- * NOTE:  The locale setting didn't work for me, so currently not using this method.
- *        Leaving it here for future troubleshooting.
- */
-export async function selfServiceSignup (user: SignupUser, locale: string) {
-  const iamToken = getAppIdentityToken();
-  return await selfServiceManager.signUp(user, locale, iamToken).then((result:any) => result);
 };
 
 /**

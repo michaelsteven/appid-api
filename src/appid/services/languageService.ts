@@ -1,5 +1,5 @@
 import { getSupportedLanguages as apiGetLanguages, putSupportedLanguages as apiPutSupportedLanguages } from '../apis';
-import { Languages } from '../models/Languages';
+import { Languages } from '../models';
 
 export async function getSupportedLanguages (acceptLanguage: string): Promise<Languages> {
   return await apiGetLanguages(acceptLanguage);

@@ -1,8 +1,10 @@
 import { Body, Controller, Delete, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
 import { Request as ExRequest } from 'express';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import jwt from 'jsonwebtoken';
+import { getEncodedAccessToken } from '../appid/helpers/token';
 import {
   signup as svcSignup,
   loginWithUsernamePassword as svcLoginWithUsernamePassword,
@@ -17,13 +19,7 @@ import {
   revokeRefreshToken as svcRevokeRefreshToken,
   redisRemove,
 } from '../appid/services';
-import { getEncodedAccessToken } from '../appid/helpers/token';
-import { CloudDirectoryUser } from '../appid/models/CloudDirectoryUser';
-import { Languages } from '../appid/models/Languages';
-import { UserProfile } from '../appid/models/UserProfile';
-import { AuthInfo } from '../appid/models/AuthInfo';
-import crypto from 'crypto';
-import { IdentityToken } from '../appid/models/IdentityToken';
+import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken } from '../appid/models';
 
 /**
  * AppId Controller
@@ -91,6 +87,11 @@ export class appIdController extends Controller {
     return Promise.reject(new ApiError(401, 'login provided an empty response'));
   };
 
+  /**
+   * Login with refresh token
+   * @param exRequest - the express request
+   * @returns Promise<AuthInfo>
+   */
   @Post('/login/refresh')
   @SuccessResponse(200, 'Successful Login')
   @Response<ApiError>(400, 'Invalid email or password')
@@ -261,6 +262,10 @@ export class appIdController extends Controller {
     return await setSupportedLanguages(body, locale);
   }
 
+  /**
+   * Logout
+   * @param exRequest - the express request
+   */
   @Delete('/logout')
   @SuccessResponse(204, 'No Content')
   public async logout (
@@ -268,8 +273,11 @@ export class appIdController extends Controller {
   ): Promise<void> {
     if (exRequest.cookies && exRequest.cookies.authTicket) {
       // revoke the refresh token
-      await svcRevokeRefreshToken(exRequest);
-
+      try {
+        await svcRevokeRefreshToken(exRequest);
+      } catch (error) {
+        console.log('failed to revoke refresh token', error);
+      }
       // remove the redis data
       await redisRemove(exRequest.cookies.authTicket);
 
