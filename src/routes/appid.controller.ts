@@ -296,13 +296,6 @@ export class appIdController extends Controller {
     @Query() count?: string,
     @Query() query?: string
   ):Promise<CloudDirectoryUsers> {
-    // const queryParams = new URLSearchParams();
-    // if (params.startIndex) {
-    //  queryParams.append('startIndex', params.startIndex) ;
-    // }
-    // if (params.count) {
-    //   queryParams.append('count', params.count);
-    // }
     const payload = { startIndex: startIndex, count: count, query: query };
     return await svcGetUsers(payload);
   }
