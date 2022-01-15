@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Put, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
+import { Body, Controller, Delete, Get, Post, Put, Query, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
 import { Request as ExRequest } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -18,8 +18,9 @@ import {
   renewAuthWithRefreshToken,
   revokeRefreshToken as svcRevokeRefreshToken,
   redisRemove,
+  getUsers as svcGetUsers
 } from '../appid/services';
-import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken } from '../appid/models';
+import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken, CloudDirectoryUsers } from '../appid/models';
 
 /**
  * AppId Controller
@@ -286,4 +287,23 @@ export class appIdController extends Controller {
       this.setHeader('Set-Cookie', `authTicket=deleted; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions} expires=Thu, 01 Jan 1970 00:00:00 GMT`);
     }
   };
+
+  @Get('/users')
+  @SuccessResponse(200, 'Ok')
+  @Security('cookie', ['appid_authenticated', 'user_management'])
+  public async getUsers (
+    @Query() startIndex?: string,
+    @Query() count?: string,
+    @Query() query?: string
+  ):Promise<CloudDirectoryUsers> {
+    // const queryParams = new URLSearchParams();
+    // if (params.startIndex) {
+    //  queryParams.append('startIndex', params.startIndex) ;
+    // }
+    // if (params.count) {
+    //   queryParams.append('count', params.count);
+    // }
+    const payload = { startIndex: startIndex, count: count, query: query };
+    return await svcGetUsers(payload);
+  }
 };

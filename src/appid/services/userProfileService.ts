@@ -1,6 +1,6 @@
 import { getSub } from '../helpers/token';
-import { getProfileForUser as apiGetUserProfile } from '../apis/userProfile';
-import { UserProfile } from '../models';
+import { getProfileForUser as apiGetUserProfile, getUsers as apiGetUsers } from '../apis';
+import { CloudDirectoryUsers, UserProfile } from '../models';
 
 /**
  * Gets the Profile for a User
@@ -10,4 +10,8 @@ import { UserProfile } from '../models';
 export const getUserProfile = async (encodedAccessToken: string): Promise<UserProfile> => {
   const sub = getSub(encodedAccessToken) || '';
   return await apiGetUserProfile(sub);
+};
+
+export const getUsers = async (payload: {startIndex?: string, count?: string, query?: string}): Promise<CloudDirectoryUsers> => {
+  return await apiGetUsers(payload);
 };

@@ -2,9 +2,7 @@ import { awaitFetch } from '../../helpers/utilities';
 import { setBearerToken } from './bearerToken';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
 import { SignupUser } from '../models/SignupUser';
-import { ForgotPasswordConfirmationResult } from '../models/ForgotPasswordConfirmationResult';
-import { CloudDirectoryUser } from '../models/CloudDirectoryUser';
-import { ChangePasswordPayload } from '../models/ChangePasswordPayload';
+import { CloudDirectoryUser, CloudDirectoryUsers, ChangePasswordPayload, ForgotPasswordConfirmationResult } from '../models';
 
 /**
  * Remove profile
@@ -110,4 +108,29 @@ export const signup = async (user: SignupUser, acceptLanguage : string): Promise
     }
   };
   return awaitFetch(url, options);
+};
+
+export const getUsers = async (payload: {startIndex?: string, count?: string, query?: string}): Promise<CloudDirectoryUsers> => {
+  const bearerToken = await setBearerToken();
+  const searchParams = new URLSearchParams();
+  if (payload.startIndex) {
+    searchParams.append('startIndex', payload.startIndex);
+  }
+  if (payload.count) {
+    searchParams.append('count', payload.count);
+  }
+  if (payload.query) {
+    searchParams.append('query', payload.query);
+  }
+
+  const url = new URL(`${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/Users`);
+  url.search = searchParams.toString();
+  const options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${bearerToken}`,
+    }
+  };
+  return awaitFetch(url.toString(), options);
 };

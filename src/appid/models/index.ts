@@ -10,3 +10,4 @@ export { PublicKeys } from './PublicKeys';
 export { RedisAuthData } from './RedisAuthData';
 export { SignupUser } from './SignupUser';
 export { UserProfile } from './UserProfile';
+export { CloudDirectoryUsers } from './CloudDirectoryUsers';
