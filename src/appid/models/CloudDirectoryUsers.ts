@@ -5,4 +5,4 @@ export interface CloudDirectoryUsers {
   itemsPerPage: number;
   schemas: Array<string>;
   resources: Array<CloudDirectoryUser>;
-};
+}

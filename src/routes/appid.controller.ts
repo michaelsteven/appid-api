@@ -292,8 +292,8 @@ export class appIdController extends Controller {
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
   public async getUsers (
-    @Query() startIndex?: string,
-    @Query() count?: string,
+    @Query() startIndex?: number,
+    @Query() count?: number,
     @Query() query?: string
   ):Promise<CloudDirectoryUsers> {
     const payload = { startIndex: startIndex, count: count, query: query };

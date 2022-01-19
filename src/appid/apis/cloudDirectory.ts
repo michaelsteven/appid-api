@@ -110,18 +110,12 @@ export const signup = async (user: SignupUser, acceptLanguage : string): Promise
   return awaitFetch(url, options);
 };
 
-export const getUsers = async (payload: {startIndex?: string, count?: string, query?: string}): Promise<CloudDirectoryUsers> => {
+export const getUsers = async (payload: {startIndex?: number, count?: number, query?: string}): Promise<CloudDirectoryUsers> => {
   const bearerToken = await setBearerToken();
   const searchParams = new URLSearchParams();
-  if (payload.startIndex) {
-    searchParams.append('startIndex', payload.startIndex);
-  }
-  if (payload.count) {
-    searchParams.append('count', payload.count);
-  }
-  if (payload.query) {
-    searchParams.append('query', payload.query);
-  }
+  if (payload.startIndex) { searchParams.append('startIndex', payload.startIndex.toString()); }
+  if (payload.count) { searchParams.append('count', payload.count.toString()); }
+  if (payload.query) { searchParams.append('query', payload.query); }
 
   const url = new URL(`${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/Users`);
   url.search = searchParams.toString();

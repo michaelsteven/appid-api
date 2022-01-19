@@ -12,6 +12,6 @@ export const getUserProfile = async (encodedAccessToken: string): Promise<UserPr
   return await apiGetUserProfile(sub);
 };
 
-export const getUsers = async (payload: {startIndex?: string, count?: string, query?: string}): Promise<CloudDirectoryUsers> => {
+export const getUsers = async (payload: {startIndex?: number, count?: number, query?: string}): Promise<CloudDirectoryUsers> => {
   return await apiGetUsers(payload);
 };
