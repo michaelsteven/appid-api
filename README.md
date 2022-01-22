@@ -3,16 +3,17 @@ Stubbed out NodeJS REST API for interacting with the AppID Service. This is a wo
 
 ## Design Decisions
 
-***Cookie Authetication***:  Two different ways of handling the tokens are possible with this project. They involve returing a JWT or setting an HttpOnly Cookie and storing the JWT in a database. The HttpOnly cookie means it can't be read by javascript. The currently coded in mechanism is cookie authentication, however there is code in place for easily switching to JWT based authentication should that fit your requirements.
+***Cookie for Browser Storage***:  Two different ways of handling the tokens are possible with this project. They consist of returing a JWT, ***or*** setting an HttpOnly Cookie, storing the JWT in a database and returning metadata for the user. The currently coded in mechanism is the cookie/metadata method, but there is code in place to easily switch to return the JWT (to be stored however you want) should that meet your requirements.
 
-As part of the Cookie Authentication flow, upon successful login a guid is generated and set into an HttpOnly cookie as an authTicket. The HttpOnly cookie means that it is not accessable via javascript.  The login method also returns basic auth info metadata for use in the client to use since the HttpOnly cookie cannot be read by javascript.  The JWT token obtained at login time and the client's IP adddress are stored in a Redis database.  The tokens are only used internally on the server, and expired from Redis after one day (when the refresh would expire). The access and refresh tokens are never shared with the client.
+As part of the Cookie flow we are using, upon successful login a guid is generated and set into an HttpOnly cookie as an "auth ticket". The HttpOnly cookie means that it is not accessable via javascript.  After setting the cookie as part of the response, the login method returns basic auth info metadata in the body for use by the client to store how it wants.  The JWT tokens obtained from AppID at login time and the client's IP adddress are stored in a Redis database.  The tokens are only used internally on the server, and expired from Redis after one day (when the refresh would expire). The access and refresh tokens are never sent down to the client.
 
-When an API request requring authorization is received, the cookie is read by the server to retrieve the authTicket.  The authTicket's guid is used to look up the JWT, the client's IP address compared, and it's access token verified. If the access token from Redis is expired, the refresh token will be used to generate a new access token and refresh_token, and then the original refresh token is revoked.  
+When an API request requring authorization is received, the cookie is read by the server to retrieve the authTicket.  The authTicket's guid is used to look up the JWT, the client's IP address compared, and it's access token verified. If the access token from Redis is expired, the refresh token will be used to generate a new access token and refresh_token, and then the original refresh token is revoked. 
+
+Currently, a new guid is generated and set in the HttpOnly cookie whenever the redis data changes. In a future change this will continue to be true, however the HttpOnly will also have correlation id that will not change for the entire session, and both of these will be encrypted/decrypted when issued/read.
 
 On logout, the refresh_token is revoked, redis data is removed, and the authTicket cookie deleted.
 
 ***TSOA***: The TSOA module is used to read the annotations on the controllers at build time, and construct the swagger json.  This works in conjunction with Express. The disadvantage is that it is more difficult to use middleware like passport to authenticate the express request.  TSOA has a pattern of using a @Security annotation to handle authorization on the request so it's not a big loss.
-
 
 ***API Calls instead of the AppID Node SDK***: The AppID Node SDK examples rely heavily of using passport with express.  Since we are using TSOA as mentioned above, it is easier for us to make the api calls directly than leverage the SDK.
 
