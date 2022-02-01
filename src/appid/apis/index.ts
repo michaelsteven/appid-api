@@ -3,3 +3,4 @@ export { signup, cloudDirectoryProfileRemove, forgotPassword, forgotPasswordConf
 export { getUserProfile, getProfileForUser } from './userProfile';
 export { loginWithUsernamePassword, loginWithRefreshToken, revokeRefreshToken, getPublicKeys } from './oauth';
 export { getSupportedLanguages, putSupportedLanguages } from './config';
+export { getRoles, getUserRoles } from './roles';

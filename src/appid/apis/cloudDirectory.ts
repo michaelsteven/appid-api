@@ -2,7 +2,7 @@ import { awaitFetch } from '../../helpers/utilities';
 import { setBearerToken } from './bearerToken';
 import { APPID_SERVICE_ENDPOINT, APPID_API_TENANT_ID } from '../../helpers/env';
 import { SignupUser } from '../models/SignupUser';
-import { CloudDirectoryUser, CloudDirectoryUsers, ChangePasswordPayload, ForgotPasswordConfirmationResult } from '../models';
+import { CloudDirectoryUser, Users, ChangePasswordPayload, ForgotPasswordConfirmationResult } from '../models';
 
 /**
  * Remove profile
@@ -110,14 +110,15 @@ export const signup = async (user: SignupUser, acceptLanguage : string): Promise
   return awaitFetch(url, options);
 };
 
-export const getUsers = async (payload: {startIndex?: number, count?: number, query?: string}): Promise<CloudDirectoryUsers> => {
+export const getUsers = async (payload: {startIndex?: number, count?: number, query?: string}): Promise<Users> => {
   const bearerToken = await setBearerToken();
   const searchParams = new URLSearchParams();
   if (payload.startIndex) { searchParams.append('startIndex', payload.startIndex.toString()); }
   if (payload.count) { searchParams.append('count', payload.count.toString()); }
   if (payload.query) { searchParams.append('query', payload.query); }
+  searchParams.append('dataScope', 'full');
 
-  const url = new URL(`${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/cloud_directory/Users`);
+  const url = new URL(`${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/users`);
   url.search = searchParams.toString();
   const options = {
     method: 'GET',
@@ -126,5 +127,5 @@ export const getUsers = async (payload: {startIndex?: number, count?: number, qu
       Authorization: `Bearer ${bearerToken}`,
     }
   };
-  return awaitFetch(url.toString(), options);
+  return await awaitFetch(url.toString(), options);
 };

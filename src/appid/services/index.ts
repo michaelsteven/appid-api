@@ -4,3 +4,4 @@ export { loginWithUsernamePassword, loginWithRefreshToken, changePassword, forgo
 export { getSupportedLanguages, setSupportedLanguages } from './languageService';
 export { get as redisGet, set as redisSet, remove as redisRemove } from './redisService';
 export { validateToken, renewAuthWithRefreshToken, revokeRefreshToken } from './tokenService';
+export { getRoles, getUserRoles } from './roleService';

@@ -11,3 +11,5 @@ export { RedisAuthData } from './RedisAuthData';
 export { SignupUser } from './SignupUser';
 export { UserProfile } from './UserProfile';
 export { CloudDirectoryUsers } from './CloudDirectoryUsers';
+export { Role } from './Role';
+export { Users } from './Users';

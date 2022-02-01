@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Put, Query, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
 import { Request as ExRequest } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
@@ -18,9 +18,12 @@ import {
   renewAuthWithRefreshToken,
   revokeRefreshToken as svcRevokeRefreshToken,
   redisRemove,
-  getUsers as svcGetUsers
+  getUsers as svcGetUsers,
+  getUserRoles as svcGetUsersRoles,
+  getRoles as svcGetRoles,
+
 } from '../appid/services';
-import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken, CloudDirectoryUsers } from '../appid/models';
+import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken, Users, Role } from '../appid/models';
 
 /**
  * AppId Controller
@@ -295,8 +298,24 @@ export class appIdController extends Controller {
     @Query() startIndex?: number,
     @Query() count?: number,
     @Query() query?: string
-  ):Promise<CloudDirectoryUsers> {
+  ):Promise<Users> {
     const payload = { startIndex: startIndex, count: count, query: query };
     return await svcGetUsers(payload);
+  }
+
+  @Get('/users/{userId}/roles')
+  @SuccessResponse(200, 'Ok')
+  @Security('cookie', ['appid_authenticated', 'user_management'])
+  public async getUserRoles (
+    @Path() userId: string
+  ):Promise<Array<Role>> {
+    return await svcGetUsersRoles(userId);
+  }
+
+  @Get('/roles')
+  @SuccessResponse(200, 'Ok')
+  @Security('cookie', ['appid_authenticated', 'user_management'])
+  public async getRoles ():Promise<Array<Role>> {
+    return await svcGetRoles();
   }
 };
