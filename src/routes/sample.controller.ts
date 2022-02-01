@@ -12,4 +12,4 @@ export class sampleController extends Controller {
   ): Promise<any> {
     return Promise.resolve(JSON.stringify({ message: 'hello' }));
   }
-};
+}

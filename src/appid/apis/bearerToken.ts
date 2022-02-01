@@ -11,7 +11,7 @@ export const setBearerToken = async () => {
       Accept: 'application/json'
     },
   };
-  const result = await fetch('https://iam.cloud.ibm.com/identity/token', options).then((result) => result);
+  const result = await fetch('https://iam.cloud.ibm.com/identity/token', options);
   if (result.ok) {
     const { access_token: accessToken } = await result.json();
     return accessToken;

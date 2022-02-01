@@ -7,4 +7,4 @@ export async function getSupportedLanguages (acceptLanguage: string): Promise<La
 
 export async function setSupportedLanguages (payload: {languages: Array<string>}, acceptLanguage: string):Promise<void> {
   return await apiPutSupportedLanguages(payload, acceptLanguage);
-};
+}

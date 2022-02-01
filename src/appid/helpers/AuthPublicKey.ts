@@ -29,7 +29,7 @@ export class AuthPublicKey {
     }
     return AuthPublicKey.publicKey;
   }
-};
+}
 
 export const getPublicKey = async ():Promise<string> => {
   const publicKeys = await svcGetPublicKeys();

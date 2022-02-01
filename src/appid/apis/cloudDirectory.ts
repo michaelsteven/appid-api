@@ -127,5 +127,5 @@ export const getUsers = async (payload: {startIndex?: number, count?: number, qu
       Authorization: `Bearer ${bearerToken}`,
     }
   };
-  return await awaitFetch(url.toString(), options);
+  return awaitFetch(url.toString(), options);
 };

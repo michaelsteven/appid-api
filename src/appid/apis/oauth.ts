@@ -45,7 +45,7 @@ export const loginWithRefreshToken = async (refreshToken: string, locale: string
   return awaitFetch(url, options);
 };
 
-export const revokeRefreshToken = async (refreshToken: string): Promise<String> => {
+export const revokeRefreshToken = async (refreshToken: string): Promise<string> => {
   const url = `${APPID_SERVICE_ENDPOINT}/oauth/v4/${APPID_API_TENANT_ID}/revoke`;
   const base64Creds = Buffer.from(`${APPID_CLIENT_ID}:${APPID_SECRET}`).toString('base64');
   const formData = new URLSearchParams();

@@ -52,7 +52,7 @@ export class appIdController extends Controller {
     const { firstName, lastName, email, password } = body;
     const locale = getLocale(exRequest);
     return await svcSignup(firstName, lastName, email, password, locale);
-  };
+  }
 
   /**
    * Login - Authenticates a user and returns the the required tokens.
@@ -89,7 +89,7 @@ export class appIdController extends Controller {
       return { exp: exp, name: name, givenName: givenName, familyName: familyName, scope: scope };
     }
     return Promise.reject(new ApiError(401, 'login provided an empty response'));
-  };
+  }
 
   /**
    * Login with refresh token
@@ -109,7 +109,7 @@ export class appIdController extends Controller {
       this.setHeader('Set-Cookie', `authTicket=${newUuid}; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions}`);
     }
     return authInfo;
-  };
+  }
 
   /**
    * Forgot Password - Starts the password reset process by sending the forgot password email.
@@ -132,7 +132,7 @@ export class appIdController extends Controller {
     const { username } = body;
     const locale = getLocale(exRequest);
     return await forgotPassword(username, locale);
-  };
+  }
 
   /**
    * Forgot Password Reset - Validates the context supplied by the forgot password email
@@ -157,7 +157,7 @@ export class appIdController extends Controller {
     const { newPassword, context } = body;
     const locale = getLocale(exRequest);
     return await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
-  };
+  }
 
   /**
    * Change Password - For an appid_authenticated user to change their own password.
@@ -189,7 +189,7 @@ export class appIdController extends Controller {
     const payload = { newPassword: newPassword, uuid: uuid };
     const locale = getLocale(exRequest);
     return await svcChangePassword(payload, locale);
-  };
+  }
 
   /**
    * Change Password for user.  This endpoint is for an administrator to change someone else's password.
@@ -289,7 +289,7 @@ export class appIdController extends Controller {
       const cookieOptions = 'path=/; SameSite=Strict; HttpOnly;';
       this.setHeader('Set-Cookie', `authTicket=deleted; ${exRequest.secure ? cookieOptions.concat(' Secure;') : cookieOptions} expires=Thu, 01 Jan 1970 00:00:00 GMT`);
     }
-  };
+  }
 
   @Get('/users')
   @SuccessResponse(200, 'Ok')
@@ -318,4 +318,4 @@ export class appIdController extends Controller {
   public async getRoles ():Promise<Array<Role>> {
     return await svcGetRoles();
   }
-};
+}

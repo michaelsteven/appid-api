@@ -9,4 +9,4 @@ export interface AccessToken {
   iat: number;
   tenant: string;
   scope: string;
-};
+}

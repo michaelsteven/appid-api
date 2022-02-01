@@ -59,7 +59,7 @@ export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequ
   }
 
   // use the refresh token to get new AuthToken
-  const { refresh_token: refreshToken, access_token: accessToken } = authToken as AuthToken;
+  const { refresh_token: refreshToken, access_token: accessToken } = authToken;
   const newAuthToken = await svcLoginWithRefreshToken(refreshToken || '', request, accessToken);
 
   // add redis data and clear out old data
@@ -88,7 +88,7 @@ export const renewAuthWithRefreshToken = async (newUuid: string, request: ExRequ
  * @param exRequest -- the express header
  * @returns Promise<String>
  */
-export async function revokeRefreshToken (exRequest: ExRequest): Promise<String> {
+export async function revokeRefreshToken (exRequest: ExRequest): Promise<string> {
   // if we can get the auth ticket from the header
   if (exRequest.cookies && exRequest.cookies.authTicket) {
     // get the refresh token from the redis data
@@ -106,4 +106,4 @@ export async function revokeRefreshToken (exRequest: ExRequest): Promise<String>
     }
   }
   return 'refresh token not revoked';
-};
+}

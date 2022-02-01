@@ -8,4 +8,4 @@ export interface JWK {
 
 export interface PublicKeys {
     keys: Array<JWK>;
-};
+}

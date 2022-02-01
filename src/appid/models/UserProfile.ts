@@ -40,4 +40,4 @@ export interface UserProfile {
   'family_name': string;
   'identities': Array<Identity>;
   'attributes': {};
-};
+}

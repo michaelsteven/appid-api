@@ -33,17 +33,17 @@ export async function signup (firstName : string, lastName : string, email: stri
         console.log('----- rollback app_id user -----');
         console.log(rollbackProfile || '');
         console.log('\n');
-      } catch (error) {
+      } catch (error2) {
         console.log('\n');
         console.log('----- rollback app_id user -----');
         console.log('Failed to rollback app_id.');
-        console.log(JSON.stringify(error));
+        console.log(JSON.stringify(error2));
         console.log('\n');
       }
     }
     throw error;
   }
-};
+}
 
 /**
  * Builds the user in the format required by AppID Signup
@@ -54,7 +54,7 @@ export async function signup (firstName : string, lastName : string, email: stri
  * @returns user
  */
 const buildSignupUser = (firstName : string, lastName : string, email: string, password: string) : SignupUser => {
-  const user = {
+  return {
     active: true,
     emails: [
       {
@@ -69,5 +69,4 @@ const buildSignupUser = (firstName : string, lastName : string, email: string, p
       givenName: firstName,
     },
   };
-  return user;
 };

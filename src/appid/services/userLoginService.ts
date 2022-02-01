@@ -21,7 +21,7 @@ import { ApiError } from '../../helpers/errors';
 export async function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AuthToken> {
   const locale = getLocale(exRequest);
   return await apiLoginWithUsernamePassword(username, password, locale);
-};
+}
 
 /**
  * Login with RefreshToken
@@ -33,7 +33,7 @@ export async function loginWithUsernamePassword (username: string, password: str
 export async function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AuthToken> {
   const locale = getLocale(exRequest);
   return await apiLoginWithRefreshToken(refreshToken, locale, accessToken);
-};
+}
 
 /**
  * Forgot Password
@@ -43,7 +43,7 @@ export async function loginWithRefreshToken (refreshToken: string, exRequest: Ex
  */
 export async function forgotPassword (username: string, locale: string) : Promise<CloudDirectoryUser> {
   return await apiForgotPassword(username, locale);
-};
+}
 
 /**
  * Forgot Password Confirmation Validate And Change
@@ -61,7 +61,7 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
   } else {
     throw new ApiError(401, 'Context Rejected');
   }
-};
+}
 
 /**
  * Change Password
@@ -71,7 +71,7 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
  */
 export async function changePassword (payload: {newPassword: string; uuid: string}, locale: string) : Promise<CloudDirectoryUser> {
   return await apiChangePassword(payload, locale);
-};
+}
 
 /**
  * Get Public Keys

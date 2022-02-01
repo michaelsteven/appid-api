@@ -23,8 +23,7 @@ export const getAccessToken = (exRequest: ExRequest): AccessToken | undefined =>
 };
 
 export const decodeAccessToken = (encodedAccessToken: string): AccessToken | undefined => {
-  const decodedAccessToken = jwtDecode(encodedAccessToken) as AccessToken;
-  return decodedAccessToken;
+  return jwtDecode(encodedAccessToken) as AccessToken;
 };
 
 export const getSub = (encodedAccessToken: string): string | undefined => {
@@ -45,7 +44,7 @@ export const getSub = (encodedAccessToken: string): string | undefined => {
  * @returns boolean
  */
 export const containsRequiredScopes = (accessToken:AccessToken, requiredScopesArray: Array<string>) => {
-  const tokenScopesArray = accessToken.scope.split(' ') as Array<string>;
+  const tokenScopesArray = accessToken.scope.split(' ');
   for (const requiredScope of requiredScopesArray) {
     if (!tokenScopesArray.includes(requiredScope)) {
       return false;
