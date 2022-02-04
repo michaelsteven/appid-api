@@ -5,7 +5,7 @@ import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
 import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, redisGet, } from '../services';
 import { ApiError } from '../../helpers/errors';
 import { containsRequiredScopes } from '../helpers/token';
-import { AccessToken, AuthToken, AuthInfo, IdentityToken, RedisAuthData } from '../models';
+import { AccessToken, AuthInfo, IdentityToken, RedisAuthData } from '../models';
 
 /**
  * Validate Token

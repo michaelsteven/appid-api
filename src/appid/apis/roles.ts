@@ -28,3 +28,17 @@ export const getUserRoles = async (profileId: string): Promise<Array<Role>> => {
   };
   return awaitFetch(url, options);
 };
+
+export const putUserRoles = async (profileId: string, roleIds: Array<string>): Promise<Array<Role>> => {
+  const bearerToken = await setBearerToken();
+  const url = `${APPID_SERVICE_ENDPOINT}/management/v4/${APPID_API_TENANT_ID}/users/${profileId}/roles`;
+  const options = {
+    method: 'PUT',
+    body: JSON.stringify({ roles: { ids: roleIds } }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${bearerToken}`,
+    }
+  };
+  return awaitFetch(url, options);
+};

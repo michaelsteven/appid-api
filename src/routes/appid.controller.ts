@@ -20,6 +20,7 @@ import {
   redisRemove,
   getUsers as svcGetUsers,
   getUserRoles as svcGetUsersRoles,
+  putUserRoles as svcPutUserRoles,
   getRoles as svcGetRoles,
 
 } from '../appid/services';
@@ -310,6 +311,18 @@ export class appIdController extends Controller {
     @Path() userId: string
   ):Promise<Array<Role>> {
     return await svcGetUsersRoles(userId);
+  }
+
+  @Put('/users/{userId}/roles')
+  @SuccessResponse(200, 'Ok')
+  @Security('cookie', ['appid_authenticated', 'user_management'])
+  public async putUserRoles (
+    @Path() userId: string,
+    @Body() body: {
+      roles: Array<string>;
+    }
+  ):Promise<Array<Role>> {
+    return await svcPutUserRoles(userId, body.roles);
   }
 
   @Get('/roles')
