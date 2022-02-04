@@ -18,9 +18,9 @@ import { ApiError } from '../../helpers/errors';
  * @param exRequest ExRequest
  * @returns []
  */
-export async function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AuthToken> {
+export function loginWithUsernamePassword (username: string, password: string, exRequest: ExRequest): Promise<AuthToken> {
   const locale = getLocale(exRequest);
-  return await apiLoginWithUsernamePassword(username, password, locale);
+  return apiLoginWithUsernamePassword(username, password, locale);
 }
 
 /**
@@ -30,9 +30,9 @@ export async function loginWithUsernamePassword (username: string, password: str
  * @param accessToken - optionally the JWT access token
  * @returns AuthToken
  */
-export async function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AuthToken> {
+export function loginWithRefreshToken (refreshToken: string, exRequest: ExRequest, accessToken?: string): Promise<AuthToken> {
   const locale = getLocale(exRequest);
-  return await apiLoginWithRefreshToken(refreshToken, locale, accessToken);
+  return apiLoginWithRefreshToken(refreshToken, locale, accessToken);
 }
 
 /**
@@ -41,8 +41,8 @@ export async function loginWithRefreshToken (refreshToken: string, exRequest: Ex
  * @param locale locale
  * @returns ForgotPasswordUser
  */
-export async function forgotPassword (username: string, locale: string) : Promise<CloudDirectoryUser> {
-  return await apiForgotPassword(username, locale);
+export function forgotPassword (username: string, locale: string) : Promise<CloudDirectoryUser> {
+  return apiForgotPassword(username, locale);
 }
 
 /**
@@ -56,8 +56,7 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
   const confirmationResult = await forgotPasswordConfirmationResult(context, locale);
   const { success, uuid } = confirmationResult;
   if (success === true) {
-    const cloudDirectoryUser = await apiChangePassword({ newPassword: newPassword, uuid: uuid }, locale);
-    return cloudDirectoryUser;
+    return await apiChangePassword({ newPassword: newPassword, uuid: uuid }, locale);
   } else {
     throw new ApiError(401, 'Context Rejected');
   }
@@ -69,14 +68,14 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
  * @param locale - the locale
  * @returns Promise<CloudDirectoryUser>
  */
-export async function changePassword (payload: {newPassword: string; uuid: string}, locale: string) : Promise<CloudDirectoryUser> {
-  return await apiChangePassword(payload, locale);
+export function changePassword (payload: {newPassword: string; uuid: string}, locale: string) : Promise<CloudDirectoryUser> {
+  return apiChangePassword(payload, locale);
 }
 
 /**
  * Get Public Keys
  * @returns PublicKeys
  */
-export const getPublicKeys = async (): Promise<PublicKeys> => {
-  return await apiGetPublicKeys();
+export const getPublicKeys = (): Promise<PublicKeys> => {
+  return apiGetPublicKeys();
 };

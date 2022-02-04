@@ -2,7 +2,6 @@ import express, { Response as ExResponse, Request as ExRequest } from 'express';
 import bodyParser from 'body-parser';
 import { I18n } from 'i18n';
 import path from 'path';
-// import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
 import errorHandler from './helpers/errorHandler';
@@ -27,7 +26,6 @@ i18n.configure({
 // add express middleware
 const app = express();
 app.use(i18n.init);
-// app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());

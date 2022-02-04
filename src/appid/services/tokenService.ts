@@ -99,7 +99,7 @@ export async function revokeRefreshToken (exRequest: ExRequest): Promise<string>
 
       // call the api to revoke the refresh token
       if (refreshToken) {
-        return await apiRevokeRefreshToken(refreshToken);
+        return apiRevokeRefreshToken(refreshToken);
       }
     } else {
       return 'no redis data';

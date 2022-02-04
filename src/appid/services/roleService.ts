@@ -1,14 +1,14 @@
 import { getRoles as apiGetRoles, getUserRoles as apiGetUserRoles, putUserRoles as apiPutUserRoles } from '../apis';
 import { Role } from '../models/Role';
 
-export async function getRoles ():Promise<Array<Role>> {
-  return await apiGetRoles();
-};
+export function getRoles ():Promise<Array<Role>> {
+  return apiGetRoles();
+}
 
-export async function getUserRoles (profileId: string):Promise<Array<Role>> {
-  return await apiGetUserRoles(profileId);
-};
+export function getUserRoles (profileId: string):Promise<Array<Role>> {
+  return apiGetUserRoles(profileId);
+}
 
-export async function putUserRoles (profileId: string, roleIds: Array<string>):Promise<Array<Role>> {
-  return await apiPutUserRoles(profileId, roleIds);
-};
+export function putUserRoles (profileId: string, roleIds: Array<string>):Promise<Array<Role>> {
+  return apiPutUserRoles(profileId, roleIds);
+}
