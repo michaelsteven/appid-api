@@ -15,12 +15,12 @@ export const awaitFetch = async (url: string, options: any): Promise<any> => {
   return handleResponse(response);
 };
 
-export const handleResponse = async (response: Response):Promise<any> => {
+export const handleResponse = (response: Response):Promise<any> => {
   if (response.ok) {
     if (response.status !== 204) {
-      return await response.json();
+      return response.json();
     } else {
-      return;
+      return Promise.resolve();
     }
   }
   throw new ApiError(response.status, response.statusText);

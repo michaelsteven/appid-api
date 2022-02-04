@@ -40,7 +40,7 @@ export class appIdController extends Controller {
   @Post('/signup')
   @SuccessResponse(201, 'Successfully created new user with id')
   @Response<ApiError>(409, 'The email address is already taken')
-  public async signup (
+  public signup (
     @Request() exRequest: ExRequest,
     @Body()
       body: {
@@ -52,7 +52,7 @@ export class appIdController extends Controller {
   ): Promise<CloudDirectoryUser> {
     const { firstName, lastName, email, password } = body;
     const locale = getLocale(exRequest);
-    return await svcSignup(firstName, lastName, email, password, locale);
+    return svcSignup(firstName, lastName, email, password, locale);
   }
 
   /**
@@ -124,7 +124,7 @@ export class appIdController extends Controller {
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  public async forgotPassword (
+  public forgotPassword (
     @Request() exRequest: ExRequest,
     @Body() body: {
       username: string;
@@ -132,7 +132,7 @@ export class appIdController extends Controller {
   ) : Promise<CloudDirectoryUser> {
     const { username } = body;
     const locale = getLocale(exRequest);
-    return await forgotPassword(username, locale);
+    return forgotPassword(username, locale);
   }
 
   /**
@@ -189,7 +189,7 @@ export class appIdController extends Controller {
     const { newPassword } = body;
     const payload = { newPassword: newPassword, uuid: uuid };
     const locale = getLocale(exRequest);
-    return await svcChangePassword(payload, locale);
+    return svcChangePassword(payload, locale);
   }
 
   /**
@@ -206,7 +206,7 @@ export class appIdController extends Controller {
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  public async changePasswordForUser (
+  public changePasswordForUser (
     @Request() exRequest: ExRequest,
     @Body() body: {
       newPassword: string;
@@ -215,7 +215,7 @@ export class appIdController extends Controller {
     }
   ) : Promise<CloudDirectoryUser> {
     const locale = getLocale(exRequest);
-    return await svcChangePassword(body, locale);
+    return svcChangePassword(body, locale);
   }
 
   /**
@@ -257,14 +257,14 @@ export class appIdController extends Controller {
   @Put('/languages')
   @Security('jwt', ['appid_authenticated', 'administrator'])
   @SuccessResponse(204, 'No Content')
-  public async supporteedLanguagesPut (
+  public supporteedLanguagesPut (
     @Request() exRequest: ExRequest,
     @Body() body: {
       languages: Array<string>;
     }
   ): Promise<void> {
     const locale = getLocale(exRequest);
-    return await setSupportedLanguages(body, locale);
+    return setSupportedLanguages(body, locale);
   }
 
   /**
@@ -295,13 +295,13 @@ export class appIdController extends Controller {
   @Get('/users')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
-  public async getUsers (
+  public getUsers (
     @Query() startIndex?: number,
     @Query() count?: number,
     @Query() query?: string
   ):Promise<Users> {
     const payload = { startIndex: startIndex, count: count, query: query };
-    return await svcGetUsers(payload);
+    return svcGetUsers(payload);
   }
 
   @Get('/users/{userId}/roles')
@@ -316,19 +316,19 @@ export class appIdController extends Controller {
   @Put('/users/{userId}/roles')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
-  public async putUserRoles (
+  public putUserRoles (
     @Path() userId: string,
     @Body() body: {
       roles: Array<string>;
     }
   ):Promise<Array<Role>> {
-    return await svcPutUserRoles(userId, body.roles);
+    return svcPutUserRoles(userId, body.roles);
   }
 
   @Get('/roles')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
-  public async getRoles ():Promise<Array<Role>> {
-    return await svcGetRoles();
+  public getRoles ():Promise<Array<Role>> {
+    return svcGetRoles();
   }
 }
