@@ -56,7 +56,7 @@ export async function forgotPasswordConfirmationValidationAndChange (newPassword
   const confirmationResult = await forgotPasswordConfirmationResult(context, locale);
   const { success, uuid } = confirmationResult;
   if (success === true) {
-    return await apiChangePassword({ newPassword: newPassword, uuid: uuid }, locale);
+    return apiChangePassword({ newPassword: newPassword, uuid: uuid }, locale);
   } else {
     throw new ApiError(401, 'Context Rejected');
   }

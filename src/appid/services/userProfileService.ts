@@ -7,11 +7,11 @@ import { Users, UserProfile } from '../models';
  * @param encodedAccessToken - encoded access token
  * @returns Promise<UserProfile>
  */
-export const getUserProfile = async (encodedAccessToken: string): Promise<UserProfile> => {
+export const getUserProfile = (encodedAccessToken: string): Promise<UserProfile> => {
   const sub = getSub(encodedAccessToken) || '';
-  return await apiGetUserProfile(sub);
+  return apiGetUserProfile(sub);
 };
 
-export const getUsers = async (payload: {startIndex?: number, count?: number, query?: string}): Promise<Users> => {
-  return await apiGetUsers(payload);
+export const getUsers = (payload: {startIndex?: number, count?: number, query?: string}): Promise<Users> => {
+  return apiGetUsers(payload);
 };

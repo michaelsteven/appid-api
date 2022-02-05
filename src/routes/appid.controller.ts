@@ -148,7 +148,7 @@ export class appIdController extends Controller {
   @Response(401, 'The user is unauthorized.')
   @Response(403, 'Insufficient permissions.')
   @Response(409, 'User account not verified.')
-  public async forgotPasswordReset (
+  public forgotPasswordReset (
     @Request() exRequest: ExRequest,
     @Body() body: {
       newPassword: string;
@@ -157,7 +157,7 @@ export class appIdController extends Controller {
   ) : Promise<CloudDirectoryUser> {
     const { newPassword, context } = body;
     const locale = getLocale(exRequest);
-    return await forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
+    return forgotPasswordConfirmationValidationAndChange(newPassword, context, locale);
   }
 
   /**

@@ -37,7 +37,7 @@ export async function expressAuthentication (request: express.Request, securityN
 
       // validate the access token or get a new token using the refresh token if expired
       const { access_token: accessToken } = authToken;
-      return await validateToken(accessToken || '', publicKey, scopes);
+      return validateToken(accessToken || '', publicKey, scopes);
     } else {
       return Promise.reject(new ApiError(401, 'Unauthorized. No auth cookie present'));
     }
@@ -45,4 +45,4 @@ export async function expressAuthentication (request: express.Request, securityN
 
   // No Auth matched
   return Promise.reject(new ApiError(401, 'No supported authentication type matched'));
-};
+}
