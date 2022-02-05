@@ -9,5 +9,6 @@
 	"api.v1.sample.sayhello.error.401": "Unauthorized",
 	"api.v1.appid.login.refresh.error.401": "api.v1.appid.login.refresh.error.401",
 	"api.v1.appid.roles.error.401": "api.v1.appid.roles.error.401",
-	"api.v1.appid.users.error.401": "api.v1.appid.users.error.401"
+	"api.v1.appid.users.error.401": "api.v1.appid.users.error.401",
+	"api.v1.appid.profile.error.401": "api.v1.appid.profile.error.401"
 }

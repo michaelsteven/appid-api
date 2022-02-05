@@ -180,8 +180,8 @@ export class appIdController extends Controller {
     }
   ) : Promise<CloudDirectoryUser> {
     // get the identity id from the user profile
-    const encodedAccessToken = getEncodedAccessToken(exRequest) || '';
-    const userProfile = await getUserProfile(encodedAccessToken);
+    const authTicket = exRequest.cookies.authTicket || '';
+    const userProfile = await getUserProfile(authTicket);
     const { identities } = userProfile;
     const { id: uuid } = identities[0];
 
@@ -229,8 +229,8 @@ export class appIdController extends Controller {
   public getProfile (
     @Request() exRequest: ExRequest
   ):Promise<UserProfile> {
-    const encodedAccessToken = getEncodedAccessToken(exRequest) || '';
-    return getUserProfile(encodedAccessToken);
+    const authTicket = exRequest.cookies.authTicket || '';
+    return getUserProfile(authTicket);
   }
 
   /**
@@ -300,17 +300,16 @@ export class appIdController extends Controller {
     @Query() count?: number,
     @Query() query?: string
   ):Promise<Users> {
-    const payload = { startIndex: startIndex, count: count, query: query };
-    return svcGetUsers(payload);
+    return svcGetUsers({ startIndex: startIndex, count: count, query: query });
   }
 
   @Get('/users/{userId}/roles')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
-  public async getUserRoles (
+  public getUserRoles (
     @Path() userId: string
   ):Promise<Array<Role>> {
-    return await svcGetUsersRoles(userId);
+    return svcGetUsersRoles(userId);
   }
 
   @Put('/users/{userId}/roles')

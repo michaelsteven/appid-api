@@ -5,7 +5,7 @@ import { APPID_API_TENANT_ID, APPID_CLIENT_ID } from '../../helpers/env';
 import { redisSet, loginWithRefreshToken as svcLoginWithRefreshToken, redisRemove, redisGet, } from '../services';
 import { ApiError } from '../../helpers/errors';
 import { containsRequiredScopes } from '../helpers/token';
-import { AccessToken, AuthInfo, IdentityToken, RedisAuthData } from '../models';
+import { AccessToken, AuthInfo, AuthToken, IdentityToken, RedisAuthData } from '../models';
 
 /**
  * Validate Token
@@ -94,7 +94,7 @@ export async function revokeRefreshToken (exRequest: ExRequest): Promise<string>
     // get the refresh token from the redis data
     const redisData = await redisGet(exRequest.cookies.authTicket);
     if (redisData) {
-      const { authToken } = JSON.parse(redisData || '') as RedisAuthData;
+      const { authToken } = JSON.parse(redisData) as RedisAuthData;
       const { refresh_token: refreshToken } = authToken;
 
       // call the api to revoke the refresh token
@@ -107,3 +107,18 @@ export async function revokeRefreshToken (exRequest: ExRequest): Promise<string>
   }
   return 'refresh token not revoked';
 }
+
+/**
+ * gets the identity token for the current user
+ * @param authTicket the auth ticket
+ * @returns Promise<IdentityToken>
+ */
+export const getIdentityToken = async (authTicket: string): Promise<IdentityToken> => {
+  const redisData = await redisGet(authTicket);
+  if (redisData) {
+    const { authToken } = JSON.parse(redisData) as RedisAuthData;
+    const { id_token: identityToken } = authToken as AuthToken;
+    return jwt.decode(identityToken) as IdentityToken;
+  }
+  return Promise.reject(new ApiError(401, 'missing redis data'));
+};
