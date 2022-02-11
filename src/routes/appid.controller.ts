@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Response, Route, Security, SuccessResponse } from 'tsoa';
-import { Request as ExRequest } from 'express';
+import { Body, Controller, Delete, Get, Path, Post, Put, Query, Request, Response, Route, Security, SuccessResponse, UploadedFile } from 'tsoa';
+import { Request as ExRequest, Response as ExResponse, Express } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { ApiError } from '../helpers/errors';
 import { getLocale } from '../helpers/locale';
-import { getEncodedAccessToken } from '../appid/helpers/token';
+import * as fs from 'fs';
+import path from 'path';
+import { bufferToReadable, circleBuffer, getMimeNameFromExt, readRangeHeader, sendBuffer, sendResponse } from '../helpers/fileUtils';
+
 import {
   signup as svcSignup,
   loginWithUsernamePassword as svcLoginWithUsernamePassword,
@@ -25,6 +28,7 @@ import {
 
 } from '../appid/services';
 import { CloudDirectoryUser, Languages, UserProfile, AuthInfo, IdentityToken, Users, Role } from '../appid/models';
+import sharp from 'sharp';
 
 /**
  * AppId Controller
@@ -292,6 +296,13 @@ export class appIdController extends Controller {
     }
   }
 
+  /**
+   * Gets users
+   * @param startIndex the start index
+   * @param count the count
+   * @param query the query
+   * @returns Promise<Users>
+   */
   @Get('/users')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
@@ -303,6 +314,11 @@ export class appIdController extends Controller {
     return svcGetUsers({ startIndex: startIndex, count: count, query: query });
   }
 
+  /**
+   * Get the roles assigned to a user
+   * @param userId the userId
+   * @returns Promise<Array<Role>>
+   */
   @Get('/users/{userId}/roles')
   @SuccessResponse(200, 'Ok')
   @Security('cookie', ['appid_authenticated', 'user_management'])
@@ -329,5 +345,67 @@ export class appIdController extends Controller {
   @Security('cookie', ['appid_authenticated', 'user_management'])
   public getRoles ():Promise<Array<Role>> {
     return svcGetRoles();
+  }
+
+  @Get('/profile/avatar')
+  @SuccessResponse('200', 'successful')
+  public async download (
+    @Request() request: any
+  ) {
+    const response = (<any>request).res as ExResponse;
+    // TODO: hardcoding use of a local file until the cloud object storage
+    //       is implemented.
+    const filePath = path.join(__dirname, '../../foo.png');
+    if (!fs.existsSync(filePath)) {
+      sendResponse(response, 404, null, null);
+      return null;
+    }
+
+    const stat: fs.Stats = await fs.promises.stat(filePath);
+    const rangeRequest = readRangeHeader(this.getHeader('range'), stat.size);
+    const mimeType = getMimeNameFromExt(path.extname(filePath));
+    const readStream = fs.createReadStream(filePath);
+    sendBuffer(readStream, stat.size, rangeRequest, response, mimeType);
+  }
+
+  @Put('/profile/avatar')
+  @SuccessResponse('204', 'successful')
+  @Response('400', 'invalid data supplied')
+  public async uploadProfilePhoto (
+    @UploadedFile() data: Express.Multer.File,
+  ) {
+    // TODO: hardcoding use of a local file until the cloud object storage
+    //       is implemented.
+    fs.writeFile('foo.png', data.buffer, (err) => {
+      if (err) return console.error(err);
+    });
+  }
+
+  @Get('/profile/avatar/thumbnail')
+  public async downloadThumnail (
+    @Request() request: any
+  ): Promise<void> {
+    const response = (<any>request).res as ExResponse;
+    // TODO: hardcoding use of a local file until the cloud object storage
+    //       is implemented.
+    const filePath = path.join(__dirname, '../../foo.png');
+
+    // Check if file exists. If not, will return the 404 'Not Found'.
+    if (!fs.existsSync(filePath)) {
+      return sendResponse(response, 404, null, null);
+    }
+
+    // resize the image and return inner circle
+    const buffer = await sharp(filePath)
+      .toFormat('png')
+      .resize(20, 20)
+      .composite([{ input: await circleBuffer, blend: 'dest-in' }])
+      .toBuffer();
+
+    // write the buffer into the response
+    const range = this.getHeader('range');
+    const readable = bufferToReadable(buffer, range);
+    const mimeType = getMimeNameFromExt('png');
+    sendBuffer(readable, buffer.length, range, response, mimeType);
   }
 }
