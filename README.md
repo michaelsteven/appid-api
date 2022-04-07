@@ -1,7 +1,7 @@
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=michaelsteven_appid-api)
 
 # appid-api
-Stubbed out NodeJS REST API for interacting with the AppID Service. This is a work in progress.
+NodeJS REST API for interacting with the AppID Service.
 
 ## Design Decisions
 
