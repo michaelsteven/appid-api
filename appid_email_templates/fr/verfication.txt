@@ -1,0 +1,2 @@
+subject: Veuillez vérifier votre adresse e-mail %{user.displayName}
+thankyoupageurl: http://localhost:8080/signupthankyou

@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head> 
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+ <title>Confirmation de l'émail</title> 
+ </head> 
+ <body> 
+ <span style="text-align: center"></span> 
+ <table width="100%" border="0" align="center" cellpadding="10" cellspacing="0" style="font-family:Gotham, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size:16px; color:#464646"> 
+ <tbody> 
+ <tr> 
+ <td align="center" valign="middle" bgcolor="%{display.headerColor}"><img src="%{display.logo}" style="object-fit:contain" height="77" alt="logo"></td> 
+ </tr> 
+ <tr> 
+ <td align="center">
+ <strong> Salut %{user.firstName},<br> <br> Merci pour l'enregistrement! </strong><br> <br> Veuillez vérifier votre adresse e-mail en cliquant sur vérifier. <br> <br> 
+ <a href="%{verify.link}" style="text-decoration:none;"> 
+ <span style="background-color:#005093; padding:10px; color:#FFFFFF; font-weight:bold; cursor: pointer">Verify</span> 
+ </a> <br> <br> Remarque : le lien n'est actif que pour %{linkExpiration.hours} heures. Si vous ne parvenez pas à utiliser le bouton de vérification, cliquez sur le lien ci-dessous ou copiez et collez-le dans la barre d'adresse de votre navigateur Web. <br> <br> 
+ <a href="%{verify.link}" style="font-size:12px">%{verify.link}
+ </a><br> <br> Si vous ne vous êtes pas inscrit avec cette adresse, vous pouvez ignorer cet e-mail. <br> <br> Merci!<br><br> 
+ </td>
+ </tr> 
+ <tr> 
+ <td bgcolor="#9F9F9F"></td> 
+ </tr> 
+ </tbody> 
+ </table> 
+ </body>
+ </html>

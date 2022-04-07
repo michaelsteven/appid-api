@@ -1,0 +1,13 @@
+redirect_uris:
+  http://localhost:3000/*
+  http://localhost:3001/*
+  http://localhost:8080/*
+  http://localhost:3001/appid/callback
+application_name: react-appid-demo
+application_type: regularwebapp
+application_scopes: foo, bar, user_management
+roles:
+  Administrator
+    scopes: [ user_management ]
+  regular user
+    scopes: [ foo, bar]

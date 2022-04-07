@@ -5,7 +5,7 @@ NodeJS REST API for interacting with the AppID Service.
 
 ## Design Decisions
 
-***Cookie for Browser Storage***:  Two different ways of handling the tokens are possible with this project. They consist of returing a JWT, ***or*** setting an HttpOnly Cookie, storing the JWT in a database and returning metadata for the user. The currently coded in mechanism is the cookie/metadata method, but there is code in place to easily switch to return the JWT (to be stored however you want) should that meet your requirements.
+***HttpOnly Cookie for Browser Storage***:  Two different ways of handling the tokens are possible with this project. They consist of returing a JWT, ***or*** setting an HttpOnly Cookie, storing the JWT in a database and returning metadata for the user. The currently coded in mechanism is the cookie/metadata method, but there is code in place to easily switch to return the JWT (to be stored however you want) should that meet your requirements.
 
 As part of the Cookie flow we are using, upon successful login a guid is generated and set into an HttpOnly cookie as an "auth ticket". The HttpOnly cookie means that it is not accessable via javascript.  After setting the cookie as part of the response, the login method returns basic auth info metadata in the body for use by the client to store how it wants.  The JWT tokens obtained from AppID at login time and the client's IP adddress are stored in a Redis database.  The tokens are only used internally on the server, and expired from Redis after one day (when the refresh would expire). The access and refresh tokens are never sent down to the client.
 
@@ -80,7 +80,8 @@ docker run --env-file=.env -p 8080:8080 michaelsteven/appid-api:latest
 ```
 
 ## Roadmap
-- Add endpoints for user management
+- Cloud Object Storage for profie image
+
 
 ## Licensing
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use these files except in compliance with the License. You may obtain a copy of the License at http://ww.apache.org/licenses/LICENSE-2.0
