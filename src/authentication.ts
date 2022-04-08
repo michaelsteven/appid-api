@@ -31,9 +31,14 @@ export async function expressAuthentication (request: express.Request, securityN
 
       // verify the IP of the request matches the IP used to log in.
       const clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
-      if (clientIp !== loginClientIp) {
-        return Promise.reject(new ApiError(401, 'Unauthorized. Ip Changed'));
-      }
+      // Troublshooting ip problems with nginx proxy
+      console.log(`the authenticate clientIp is: ${clientIp} `);
+      console.log(`the login clientIp is: ${loginClientIp} `);
+      console.log(`the x-forward-for is: ${request.headers['x-forwarded-for']}`);
+      console.log(`the remoteAddress is: ${request.socket.remoteAddress}`);
+      // if (clientIp !== loginClientIp) {
+      //  return Promise.reject(new ApiError(401, 'Unauthorized. Ip Changed'));
+      // }
 
       // validate the access token or get a new token using the refresh token if expired
       const { access_token: accessToken } = authToken;

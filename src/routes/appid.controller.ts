@@ -81,6 +81,7 @@ export class appIdController extends Controller {
       // set the auth token and client ip in redis
       const uuid = crypto.randomUUID();
       const clientIp = exRequest.headers['x-forwarded-for'] || exRequest.socket.remoteAddress;
+      console.log(`the login clientIp is: ${clientIp} `);
       const redisAuthData = JSON.stringify({ clientIp: clientIp, authToken: responsePayload });
       await redisSet(uuid, redisAuthData, 86400); // expire in one day
 
