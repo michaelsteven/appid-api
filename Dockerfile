@@ -1,17 +1,25 @@
+
 # base image
-FROM node:lts-alpine as base
+# because we are using sharp, we can't use alpine
+FROM node:slim as base
 ENV APP_DIR=/home/node/app
-RUN apk add --no-cache tini && \
-    mkdir $APP_DIR && chown node:node $APP_DIR
-WORKDIR $APP_DIR    
-ENTRYPOINT ["/sbin/tini", "--"]
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN apt-get update && \
+   apt-get -y install musl && \
+   mkdir $APP_DIR && chmod +x /tini
+WORKDIR $APP_DIR
+RUN npm install --verbose sharp && \
+    chown node:node $APP_DIR
 COPY --chown=node:node package.json package-lock.json* npm-shrinkwrap.json* tsoa.json ./
+ENTRYPOINT ["/tini", "--"]
+
 
 # build and test
 FROM base as test
-RUN apk add --no-cache --virtual .gyp python3 make g++ \
-  && npm ci \
-  && apk del .gyp
+RUN apt-get install -y .gyp python3 make g++ \
+    && npm ci \
+    && apt del .gyp
 COPY --chown=node:node src ./src
 RUN npm run build && \
     npm run lint && \
@@ -21,7 +29,7 @@ RUN npm run build && \
 FROM base
 COPY --chown=node:node src ./src
 ENV NODE_ENV production
-RUN npm ci --ignore-scripts && \
+RUN npm ci && \
     npm install -g ts-node && \
     npm run build
 
