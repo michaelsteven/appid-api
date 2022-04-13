@@ -205,7 +205,7 @@ export class appIdController extends Controller {
    * @returns Promise<CloudDirectoryUser>
    */
   @Post('/changepwdforuser')
-  @Security('cookie', ['appid_authenticated', 'administrator'])
+  @Security('cookie', ['appid_authenticated', 'user_management'])
   @SuccessResponse(200, 'Successful Login')
   @Response(400, 'The request body is missing or invalid')
   @Response(401, 'The user is unauthorized.')
@@ -244,6 +244,7 @@ export class appIdController extends Controller {
    * @returns Promise<Languages>
    */
   @Get('/languages')
+  @Security('cookie', ['appid_authenticated', 'app_management'])
   @SuccessResponse(200, 'Gets Supported Languages')
   public supportedLanguagesGet (
     @Request() exRequest: ExRequest
@@ -260,7 +261,7 @@ export class appIdController extends Controller {
    * @returns void
    */
   @Put('/languages')
-  @Security('jwt', ['appid_authenticated', 'administrator'])
+  @Security('cookie', ['appid_authenticated', 'app_management'])
   @SuccessResponse(204, 'No Content')
   public supporteedLanguagesPut (
     @Request() exRequest: ExRequest,
